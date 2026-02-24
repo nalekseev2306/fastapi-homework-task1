@@ -11,8 +11,11 @@ class UserCreate(BaseModel):
     last_name: str = Field(min_length=3, max_length=64)
 
 # модель для возврата пользователя
-class UserResponse(UserCreate):
+class UserResponse(BaseModel):
     id: int
+    email: EmailStr
+    first_name: str
+    last_name: str
 
 # модель для обновления пользователя
 class UserUpdate(BaseModel):
