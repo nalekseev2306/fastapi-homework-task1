@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Response, status
 
-# from schemas.posts import Post
-# from schemas.users import User
+# from schemas.models import User, Post, Category, Location, Comment
 
 router = APIRouter()
 
