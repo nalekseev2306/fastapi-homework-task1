@@ -9,7 +9,7 @@ router = APIRouter()
 users_db = {} # тут будем временно хранить данные
 user_counter = 1 # генератор id
 
-# запросы к пользователю
+# запросы к пользователям
 @router.post('/users/', response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def create_user(user: UserCreate):
     global user_counter
