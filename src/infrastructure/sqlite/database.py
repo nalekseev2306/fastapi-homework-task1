@@ -8,7 +8,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 class Database:
     def __init__(self):
-        self._db_url = "sqlite:///D:/Progi/Backend/fastapi"
+        self._db_url = "sqlite:///D:/Progi/Backend/fastapi/test.db"
         self._engine = create_engine(self._db_url)
 
     # аналог with для работы с сессиями

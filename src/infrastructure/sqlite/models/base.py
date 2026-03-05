@@ -1,9 +1,9 @@
-from typing import Optional
 from datetime import datetime
-
-from infrastructure.sqlite.database import Base
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import func
+
+from infrastructure.sqlite.database import Base
+
 
 class BaseModel(Base):
     __abstract__ = True
@@ -16,7 +16,7 @@ class BaseModel(Base):
 
 
 class PublishStatusMixin:
-    pub_date: Mapped[datetime] = mapped_column(
+    created_at: Mapped[datetime] = mapped_column(
         server_default=func.now(),
         nullable=False
     )
