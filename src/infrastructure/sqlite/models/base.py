@@ -2,7 +2,7 @@ from datetime import datetime
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import func
 
-from infrastructure.sqlite.database import Base
+from src.infrastructure.sqlite.database import Base
 
 
 class BaseModel(Base):
