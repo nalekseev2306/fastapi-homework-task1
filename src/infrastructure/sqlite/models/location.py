@@ -8,7 +8,11 @@ from .post import Post
 class Location(BaseModel, PublishStatusMixin):
     __tablename__ = 'locations'
     
-    name: Mapped[str] = mapped_column(nullable=False)
+    name: Mapped[str] = mapped_column(
+        unique=True,
+        index=True,
+        nullable=False
+    )
 
     posts: Mapped[List['Post']] = relationship(
         'Post',

@@ -1,10 +1,12 @@
 from pydantic import BaseModel, Field
-# from typing import Optional
 from datetime import datetime
 
 
-class Location(BaseModel):
-    id: int
+class LocationCreate(BaseModel):
     name: str = Field(max_length=256)
-    is_published: bool = True
-    created_at: datetime = Field(default_factory=datetime.now())
+
+class LocationResponse(BaseModel):
+    id: int
+    name: str
+    is_published: bool
+    created_at: datetime
