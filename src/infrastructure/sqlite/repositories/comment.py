@@ -1,8 +1,8 @@
 from typing import Type, List, Optional
 from sqlalchemy.orm import Session
 
-from src.infrastructure.sqlite.models import Comment
-from src.schemas.comment import CommentCreate, CommentUpdate
+from infrastructure.sqlite.models import Comment
+from schemas.comment import CommentCreate, CommentUpdate
 
 
 class CommentRepository:

@@ -27,9 +27,11 @@ class User(BaseModel):
 
     posts: Mapped[List['Post']] = relationship(
         'Post',
-        back_populates='author'
+        back_populates='author',
+        cascade='all, delete-orphan'
     )
     comments: Mapped[List['Comment']] = relationship(
         'Comment',
-        back_populates='author'   
+        back_populates='author',
+        cascade='all, delete-orphan'  
     )

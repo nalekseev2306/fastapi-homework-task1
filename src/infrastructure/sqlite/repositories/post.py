@@ -1,8 +1,8 @@
 from typing import Type, List, Optional
 from sqlalchemy.orm import Session
 
-from src.infrastructure.sqlite.models import Post
-from src.schemas.post import PostCreate, PostUpdate
+from infrastructure.sqlite.models import Post
+from schemas.post import PostCreate, PostUpdate
 
 
 class PostRepository:

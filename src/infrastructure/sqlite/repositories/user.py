@@ -1,8 +1,8 @@
 from typing import Type, List, Optional
 from sqlalchemy.orm import Session
 
-from src.infrastructure.sqlite.models import User
-from src.schemas.user import UserCreate, UserUpdate
+from infrastructure.sqlite.models import User
+from schemas.user import UserCreate, UserUpdate
 
 
 class UserRepository:
@@ -19,6 +19,11 @@ class UserRepository:
         return (self._session.query(self._model)
                 .where(self._model.username == username)
                 .scalar())
+    
+    def get_by_email(self, email: str) -> Optional[User]:
+        return (self._session.query(self._model)
+                .where(self._model.email == email)
+                .scalar())
 
     def get_all(self) -> List[User]:
         return self._session.query(self._model).all()
@@ -27,7 +32,7 @@ class UserRepository:
         user = self._model(
             username=user_data.username,
             email=user_data.email,
-            password=user_data.password,
+            password=user_data.password.get_secret_value(),
             first_name=user_data.first_name,
             last_name=user_data.last_name
         )
@@ -44,7 +49,10 @@ class UserRepository:
         update_data = user_data.model_dump(exclude_unset=True)
         for key, value in update_data.items():
             if hasattr(user, key):
-                setattr(user, key, value)
+                if key == 'password':
+                    setattr(user, key, value.get_secret_value())
+                else:
+                    setattr(user, key, value)
         
         self._session.commit()
         self._session.refresh(user)

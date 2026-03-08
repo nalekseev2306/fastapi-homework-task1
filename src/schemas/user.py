@@ -13,9 +13,13 @@ class UserCreate(BaseModel):
 # модель для возврата пользователя
 class UserResponse(BaseModel):
     id: int
-    email: EmailStr
+    username: str
+    email: str
     first_name: str
     last_name: str
+    
+    class Config:
+        from_attributes = True
 
 # модель для обновления пользователя
 class UserUpdate(BaseModel):

@@ -1,8 +1,8 @@
 from typing import Type, List, Optional
 from sqlalchemy.orm import Session
 
-from src.infrastructure.sqlite.models import Category
-from src.schemas.category import CategoryCreate, CategoryUpdate
+from infrastructure.sqlite.models import Category
+from schemas.category import CategoryCreate, CategoryUpdate
 
 
 class CategoryRepository:

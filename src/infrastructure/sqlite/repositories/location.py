@@ -1,8 +1,8 @@
 from typing import Type, List, Optional
 from sqlalchemy.orm import Session
 
-from src.infrastructure.sqlite.models import Location
-from src.schemas.location import LocationCreate
+from infrastructure.sqlite.models import Location
+from schemas.location import LocationCreate
 
 
 class LocationRepository:

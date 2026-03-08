@@ -31,7 +31,7 @@ class Comment(BaseModel):
         'User',
         back_populates='comments'
     )
-    post: Mapped[Post] = relationship(
+    post: Mapped['Post'] = relationship(
         'Post',
         back_populates='comments'
     )
