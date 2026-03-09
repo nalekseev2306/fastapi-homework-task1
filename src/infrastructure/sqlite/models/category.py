@@ -18,5 +18,6 @@ class Category(BaseModel, PublishStatusMixin):
 
     posts: Mapped[List['Post']] = relationship(
         'Post',
-        back_populates='category'
+        back_populates='category',
+        cascade='all, delete-orphan'
     )

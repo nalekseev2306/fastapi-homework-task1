@@ -15,6 +15,9 @@ class CategoryResponse(CategoryCreate):
     id: int
     created_at: datetime
 
+    class Config:
+        from_attributes = True
+
 # модель для обновления категории
 class CategoryUpdate(BaseModel):
     title: Optional[str] = Field(default=None, max_length=256)
