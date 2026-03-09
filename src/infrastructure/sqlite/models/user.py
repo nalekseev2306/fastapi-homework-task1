@@ -33,5 +33,5 @@ class User(BaseModel):
     comments: Mapped[List['Comment']] = relationship(
         'Comment',
         back_populates='author',
-        cascade='all, delete-orphan'  
+        cascade='all, delete-orphan'
     )

@@ -16,5 +16,6 @@ class Location(BaseModel, PublishStatusMixin):
 
     posts: Mapped[List['Post']] = relationship(
         'Post',
-        back_populates='location'
+        back_populates='location',
+        cascade='all, delete-orphan'
     )

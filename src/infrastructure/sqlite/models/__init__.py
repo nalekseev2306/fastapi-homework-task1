@@ -5,4 +5,5 @@ from .category import Category
 from .location import Location
 from .comment import Comment
 
+
 __all__ = ['BaseModel', 'User', 'Post', 'Category', 'Location', 'Comment']

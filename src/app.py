@@ -1,10 +1,10 @@
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
-from api.user import router as user_router
-from api.post import router as post_router
-from api.category import router as category_router
-from api.comment import router as comment_router
+from api import (
+    user_router, post_router, category_router,
+    comment_router, location_router
+)
 
 
 def create_app() -> FastAPI:
@@ -23,6 +23,7 @@ def create_app() -> FastAPI:
     app.include_router(router=user_router, prefix='/api', tags=['users'])
     app.include_router(router=post_router, prefix='/api', tags=['posts'])
     app.include_router(router=category_router, prefix='/api', tags=['categories'])
+    app.include_router(router=location_router, prefix='/api', tags=['locations'])
     app.include_router(router=comment_router, prefix='/api', tags=['comments'])
 
     return app
