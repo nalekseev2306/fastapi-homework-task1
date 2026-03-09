@@ -18,12 +18,12 @@ class PostRepository:
     def get_all(self) -> List[Post]:
         return self._session.query(self._model).all()
 
-    def create(self, post_data: PostCreate, author_id: int) -> Post:
+    def create(self, post_data: PostCreate) -> Post:
         post = self._model(
             title=post_data.title,
             text=post_data.text,
             pub_date=post_data.pub_date,
-            user_id=author_id,
+            user_id=post_data.user_id,
             location_id=post_data.location_id,
             category_id=post_data.category_id,
             is_published=post_data.is_published

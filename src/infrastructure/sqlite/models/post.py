@@ -26,17 +26,17 @@ class Post(BaseModel, PublishStatusMixin):
     )
 
     user_id: Mapped[int] = mapped_column(
-        ForeignKey('users.id', ondelete='CASCADE'),
+        ForeignKey('users.id'),
         nullable=False,
         index=True
     )
     location_id: Mapped[int] = mapped_column(
-        ForeignKey('locations.id', ondelete='CASCADE'),
+        ForeignKey('locations.id'),
         nullable=False,
         index=True
     )
     category_id: Mapped[int] = mapped_column(
-        ForeignKey('categories.id', ondelete='CASCADE'),
+        ForeignKey('categories.id'),
         nullable=False,
         index=True
     )
