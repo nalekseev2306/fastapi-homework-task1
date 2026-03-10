@@ -18,12 +18,11 @@ class CommentRepository:
     def get_all(self) -> List[Comment]:
         return self._session.query(self._model).all()
 
-    def create(self, comment_data: CommentCreate,
-               author_id: int) -> Comment:
+    def create(self, comment_data: CommentCreate) -> Comment:
         comment = self._model(
             text=comment_data.text,
             post_id=comment_data.post_id,
-            user_id=author_id
+            user_id=comment_data.user_id
         )
         self._session.add(comment)
         self._session.commit()
