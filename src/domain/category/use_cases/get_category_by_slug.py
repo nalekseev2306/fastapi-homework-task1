@@ -3,6 +3,8 @@ from fastapi import HTTPException, status
 from infrastructure.sqlite.database import database
 from infrastructure.sqlite.repositories import CategoryRepository
 from schemas.category import CategoryResponse
+from core.exceptions.database_exceptions import NotFoundException
+from core.exceptions.domain_exceptions import CategoryNotFoundBySlugException
 
 
 class GetCategoryBySlugUseCase:
@@ -13,11 +15,9 @@ class GetCategoryBySlugUseCase:
         with self._database.session() as session:
             repo = CategoryRepository(session)
 
-            category = repo.get_by_slug(slug)
-            if not category:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f'Category with slug "{slug}" not found'
-                )
+            try:
+                category = repo.get_by_slug(slug)
+            except NotFoundException:
+                raise CategoryNotFoundBySlugException(slug=slug)
 
             return CategoryResponse.model_validate(category)

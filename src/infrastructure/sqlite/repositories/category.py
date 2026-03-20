@@ -1,8 +1,14 @@
 from typing import Type, List, Optional
+from sqlalchemy import select, insert
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 
 from infrastructure.sqlite.models import Category
 from schemas.category import CategoryCreate, CategoryUpdate
+from core.exceptions.database_exceptions import (
+    NotFoundException,
+    AlreadyExistsException
+)
 
 
 class CategoryRepository:
@@ -11,34 +17,49 @@ class CategoryRepository:
         self._session = session
 
     def get(self, category_id: int) -> Optional[Category]:
-        return (self._session.query(self._model)
-                .where(self._model.id == category_id)
-                .scalar())
+        query = (
+            select(self._model)
+            .where(self._model.id == category_id)
+        )
+
+        user = self._session.scalar(query)
+        if not user:
+            raise NotFoundException()
+
+        return user
 
     def get_by_slug(self, slug: str) -> Optional[Category]:
-        return (self._session.query(self._model)
-                .where(self._model.slug == slug)
-                .scalar())
+        query = (
+            select(self._model)
+            .where(self._model.slug == slug)
+        )
+
+        user = self._session.scalar(query)
+        if not user:
+            raise NotFoundException()
+
+        return user
 
     def get_all(self) -> List[Category]:
         return self._session.query(self._model).all()
 
     def create(self, category_data: CategoryCreate) -> Category:
-        category = self._model(
-            name=category_data.name,
-            description=category_data.description,
-            slug=category_data.slug
+        query = (
+            insert(self._model)
+            .values(category_data.model_dump())
+            .returning(self._model)
         )
-        self._session.add(category)
-        self._session.commit()
-        self._session.refresh(category)
+        
+        try:
+            category = self._session.scalar(query)
+        except IntegrityError:
+            raise AlreadyExistsException()
+        
         return category
 
     def update(self, category_id: int, 
                category_data: CategoryUpdate) -> Optional[Category]:
         category = self.get(category_id)
-        if not category:
-            return None
         
         update_data = category_data.model_dump(exclude_unset=True)
         for key, value in update_data.items():
@@ -51,8 +72,6 @@ class CategoryRepository:
 
     def delete(self, category_id: int) -> bool:
         category = self.get(category_id)
-        if not category:
-            return False
 
         self._session.delete(category)
         self._session.commit()

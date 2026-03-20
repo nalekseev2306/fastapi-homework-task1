@@ -3,6 +3,8 @@ from fastapi import HTTPException, status
 from infrastructure.sqlite.database import database
 from infrastructure.sqlite.repositories import CategoryRepository
 from schemas.category import CategoryResponse, CategoryCreate
+from core.exceptions.database_exceptions import AlreadyExistsException
+from core.exceptions.domain_exceptions import CategoryWithSlugAlreadyExistException
 
 
 class CreateCategoryUseCase:
@@ -13,11 +15,9 @@ class CreateCategoryUseCase:
         with self._database.session() as session:
             repo = CategoryRepository(session)
 
-            if repo.get_by_slug(category_data.slug):
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f'Category with slug "{category_data.slug}" already exists'
-                )
+            try:
+                new_category = repo.create(category_data)
+            except AlreadyExistsException:
+                raise CategoryWithSlugAlreadyExistException(category_data.slug)
 
-            new_category = repo.create(category_data)
             return CategoryResponse.model_validate(new_category)

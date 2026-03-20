@@ -20,7 +20,7 @@ class CategoryResponse(CategoryCreate):
 
 # модель для обновления категории
 class CategoryUpdate(BaseModel):
-    title: Optional[str] = Field(default=None, max_length=256)
+    name: Optional[str] = Field(default=None, max_length=256)
     description: Optional[str] = None
     slug: Optional[str] = Field(default=None, max_length=64, pattern=r'^[a-zA-Z0-9_-]+$')
     is_published: Optional[bool] = None
