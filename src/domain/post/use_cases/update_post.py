@@ -1,11 +1,14 @@
-from fastapi import HTTPException, status
-
 from infrastructure.sqlite.database import database
 from infrastructure.sqlite.repositories import (PostRepository, 
     CategoryRepository, LocationRepository
 )
 from schemas.post import PostResponse, PostUpdate
-
+from core.exceptions.database_exceptions import NotFoundException
+from core.exceptions.domain_exceptions import (
+    PostNotFoundException,
+    CategoryNotFoundException,
+    LocationNotFoundException
+)
 
 class UpdatePostUseCase:
     def __init__(self):
@@ -17,26 +20,22 @@ class UpdatePostUseCase:
             category_repo = CategoryRepository(session)
             location_repo = LocationRepository(session)
 
-            existing_post = repo.get(post_id)
-            if not existing_post:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f'Post with id "{post_id}" not found'
-                )
+            try:
+                existing_post = repo.get(post_id)
+            except NotFoundException:
+                raise PostNotFoundException(id=post_id)
             
             if post_data.category_id and post_data.category_id != existing_post.category_id:
-                if not category_repo.get(post_data.category_id):
-                    raise HTTPException(
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                        detail=f'Category with id "{post_data.category_id}" not found'
-                    )
+                try:
+                    category_repo.get(post_data.category_id)
+                except NotFoundException:
+                    raise CategoryNotFoundException(id=post_data.category_id)
 
             if post_data.location_id and post_data.location_id != existing_post.location_id:
-                if not location_repo.get(post_data.location_id):
-                    raise HTTPException(
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                        detail=f'Location with id "{post_data.location_id}" not found'
-                    )
+                try:
+                    location_repo.get(post_data.location_id)
+                except NotFoundException:
+                    raise LocationNotFoundException(id=post_data.location_id)
 
             updated_post = repo.update(post_id, post_data)
             return PostResponse.model_validate(updated_post)

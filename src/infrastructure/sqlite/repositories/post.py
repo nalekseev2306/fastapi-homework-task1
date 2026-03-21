@@ -1,8 +1,10 @@
 from typing import Type, List, Optional
 from sqlalchemy.orm import Session
+from sqlalchemy import select, insert
 
 from infrastructure.sqlite.models import Post
 from schemas.post import PostCreate, PostUpdate
+from core.exceptions.database_exceptions import NotFoundException
 
 
 class PostRepository:
@@ -11,32 +13,32 @@ class PostRepository:
         self._session = session
 
     def get(self, post_id: int) -> Optional[Post]:
-        return (self._session.query(self._model)
-                .where(self._model.id == post_id)
-                .scalar())
+        query = (
+            select(self._model)
+            .where(self._model.id == post_id)
+        )
+
+        post = self._session.scalar(query)
+        if not post:
+            raise NotFoundException()
+
+        return post
 
     def get_all(self) -> List[Post]:
         return self._session.query(self._model).all()
 
     def create(self, post_data: PostCreate) -> Post:
-        post = self._model(
-            title=post_data.title,
-            text=post_data.text,
-            pub_date=post_data.pub_date,
-            user_id=post_data.user_id,
-            location_id=post_data.location_id,
-            category_id=post_data.category_id,
-            is_published=post_data.is_published
+        query = (
+            insert(self._model)
+            .values(post_data.model_dump())
+            .returning(self._model)
         )
-        self._session.add(post)
-        self._session.commit()
-        self._session.refresh(post)
+
+        post = self._session.scalar(query)
         return post
 
     def update(self, post_id: int, post_data: PostUpdate) -> Optional[Post]:
         post = self.get(post_id)
-        if not post:
-            return None
         
         update_data = post_data.model_dump(exclude_unset=True)
         for key, value in update_data.items():
@@ -49,8 +51,6 @@ class PostRepository:
 
     def delete(self, post_id: int) -> bool:
         post = self.get(post_id)
-        if not post:
-            return False
         
         self._session.delete(post)
         self._session.commit()

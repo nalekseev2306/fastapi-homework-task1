@@ -1,8 +1,8 @@
-from fastapi import HTTPException, status
-
 from infrastructure.sqlite.database import database
 from infrastructure.sqlite.repositories import PostRepository
 from schemas.post import PostResponse
+from core.exceptions.database_exceptions import NotFoundException
+from core.exceptions.domain_exceptions import PostNotFoundException
 
 
 class GetPostUseCase:
@@ -13,11 +13,9 @@ class GetPostUseCase:
         with self._database.session() as session:
             repo = PostRepository(session)
 
-            post = repo.get(post_id)
-            if not post:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f'Post with id "{post_id}" not found'
-                )
+            try:
+                post = repo.get(post_id)
+            except NotFoundException:
+                raise PostNotFoundException(id=post_id)
 
             return PostResponse.model_validate(post)

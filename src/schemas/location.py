@@ -19,10 +19,8 @@ class LocationCreate(BaseModel):
         return name
 
 
-class LocationResponse(BaseModel):
+class LocationResponse(LocationCreate):
     id: int
-    name: str
-    is_published: bool
     created_at: datetime
 
     class Config:

@@ -1,10 +1,15 @@
-from fastapi import HTTPException, status
-
 from infrastructure.sqlite.database import database
-from infrastructure.sqlite.repositories import (PostRepository, 
-    UserRepository, CategoryRepository, LocationRepository
+from infrastructure.sqlite.repositories import (
+    PostRepository, UserRepository,
+    CategoryRepository, LocationRepository
 )
 from schemas.post import PostResponse, PostCreate
+from core.exceptions.database_exceptions import NotFoundException
+from core.exceptions.domain_exceptions import (
+    UserNotFoundException,
+    CategoryNotFoundException,
+    LocationNotFoundException
+)
 
 
 class CreatePostUseCase:
@@ -18,23 +23,20 @@ class CreatePostUseCase:
             category_repo = CategoryRepository(session)
             location_repo = LocationRepository(session)
 
-            if not user_repo.get(post_data.user_id):
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f'Author with id "{post_data.user_id}" not found'
-                )
+            try:
+                user_repo.get(post_data.user_id)
+            except NotFoundException:
+                raise UserNotFoundException(id=post_data.user_id)
 
-            if not category_repo.get(post_data.category_id):
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f'Category with id "{post_data.category_id}" not found'
-                )
+            try:
+                category_repo.get(post_data.category_id)
+            except NotFoundException:
+                raise CategoryNotFoundException(id=post_data.category_id)
 
-            if not location_repo.get(post_data.location_id):
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f'Location with id "{post_data.location_id}" not found'
-                )
+            try:
+                location_repo.get(post_data.location_id)
+            except NotFoundException:
+                raise LocationNotFoundException(id=post_data.location_id)
 
             new_post = repo.create(post_data)
             return PostResponse.model_validate(new_post)

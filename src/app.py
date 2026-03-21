@@ -20,10 +20,10 @@ def create_app() -> FastAPI:
     )
 
     # подключаем роутеры
-    app.include_router(router=user_router, prefix='/api', tags=['users'])
-    app.include_router(router=post_router, prefix='/api', tags=['posts'])
-    app.include_router(router=category_router, prefix='/api', tags=['categories'])
-    app.include_router(router=location_router, prefix='/api', tags=['locations'])
-    app.include_router(router=comment_router, prefix='/api', tags=['comments'])
+    app.include_router(router=user_router, tags=['users'])
+    app.include_router(router=post_router, tags=['posts'])
+    app.include_router(router=category_router, tags=['categories'])
+    app.include_router(router=location_router, tags=['locations'])
+    app.include_router(router=comment_router, tags=['comments'])
 
     return app
