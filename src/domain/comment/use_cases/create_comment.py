@@ -5,6 +5,11 @@ from infrastructure.sqlite.repositories import (CommentRepository,
     UserRepository, PostRepository
 )
 from schemas.comment import CommentResponse, CommentCreate
+from core.exceptions.database_exceptions import NotFoundException
+from core.exceptions.domain_exceptions import (
+    PostNotFoundException,
+    UserNotFoundException
+)
 
 
 class CreateCommentUseCase:
@@ -17,17 +22,15 @@ class CreateCommentUseCase:
             user_repo = UserRepository(session)
             post_repo = PostRepository(session)
 
-            if not user_repo.get(comment_data.user_id):
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f'Author with id "{comment_data.user_id}" not found'
-                )
+            try:
+                user_repo.get(comment_data.user_id)
+            except NotFoundException:
+                raise UserNotFoundException(id=comment_data.user_id)
 
-            if not post_repo.get(comment_data.post_id):
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f'Post with id "{comment_data.post_id}" not found'
-                )
+            try:
+                post_repo.get(comment_data.post_id)
+            except NotFoundException:
+                raise PostNotFoundException(id=comment_data.post_id)
 
             new_comment = repo.create(comment_data)
             return CommentResponse.model_validate(new_comment)

@@ -3,6 +3,8 @@ from fastapi import HTTPException, status
 from infrastructure.sqlite.database import database
 from infrastructure.sqlite.repositories import CommentRepository
 from schemas.comment import CommentResponse, CommentUpdate
+from core.exceptions.database_exceptions import NotFoundException
+from core.exceptions.domain_exceptions import CommentNotFoundException
 
 
 class UpdateCommentUseCase:
@@ -13,11 +15,10 @@ class UpdateCommentUseCase:
         with self._database.session() as session:
             repo = CommentRepository(session)
 
-            if not repo.get(comment_id):
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f'Comment with id "{comment_id}" not found'
-                )
+            try:
+                repo.get(comment_id)
+            except NotFoundException:
+                raise CommentNotFoundException(id=comment_id)
 
             updated_comment = repo.update(comment_id, comment_data)
             return CommentResponse.model_validate(updated_comment)

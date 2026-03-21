@@ -1,8 +1,10 @@
 from typing import Type, List, Optional
 from sqlalchemy.orm import Session
+from sqlalchemy import select, insert
 
 from infrastructure.sqlite.models import Comment
 from schemas.comment import CommentCreate, CommentUpdate
+from core.exceptions.database_exceptions import NotFoundException
 
 
 class CommentRepository:
@@ -11,29 +13,32 @@ class CommentRepository:
         self._session = session
 
     def get(self, comment_id: int) -> Optional[Comment]:
-        return (self._session.query(self._model)
-                .where(self._model.id == comment_id)
-                .scalar())
+        query = (
+            select(self._model)
+            .where(self._model.id == comment_id)
+        )
+
+        comment = self._session.scalar(query)
+        if not comment:
+            raise NotFoundException
+
+        return comment
 
     def get_all(self) -> List[Comment]:
         return self._session.query(self._model).all()
 
     def create(self, comment_data: CommentCreate) -> Comment:
-        comment = self._model(
-            text=comment_data.text,
-            post_id=comment_data.post_id,
-            user_id=comment_data.user_id
+        query = (insert(self._model)
+            .values(comment_data.model_dump())
+            .returning(self._model)
         )
-        self._session.add(comment)
-        self._session.commit()
-        self._session.refresh(comment)
+
+        comment = self._session.scalar(query)
         return comment
 
     def update(self, comment_id: int,
                comment_data: CommentUpdate) -> Optional[Comment]:
         comment = self.get(comment_id)
-        if not comment:
-            return None
         
         update_data = comment_data.model_dump(exclude_unset=True)
         for key, value in update_data.items():
@@ -46,8 +51,6 @@ class CommentRepository:
 
     def delete(self, comment_id: int) -> bool:
         comment = self.get(comment_id)
-        if not comment:
-            return False
         
         self._session.delete(comment)
         self._session.commit()

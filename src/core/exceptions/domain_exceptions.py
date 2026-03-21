@@ -31,3 +31,31 @@ class CategoryWithSlugAlreadyExistException(BaseDomainException):
         self._text_template = self._text_template.format(slug=slug)
 
         super().__init__(detail=self._text_template)
+
+
+class CommentNotFoundException(BaseDomainException):
+    _text_template = "Comment with ID '{id}' not found"
+
+    def __init__(self, id: int) -> None:
+        self._text_template = self._text_template.format(id=id)
+
+        super().__init__(detail=self._text_template)
+
+
+class UserNotFoundException(BaseDomainException):
+    _text_template = "User with ID '{id}' not found"
+
+    def __init__(self, id: int) -> None:
+        self._text_template = self._text_template.format(id=id)
+
+        super().__init__(detail=self._text_template)
+
+
+class PostNotFoundException(BaseDomainException):
+    _text_template = "Post with ID '{id}' not found"
+
+    def __init__(self, id: int) -> None:
+        self._text_template = self._text_template.format(id=id)
+
+        super().__init__(detail=self._text_template)
+

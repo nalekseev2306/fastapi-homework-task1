@@ -3,14 +3,13 @@ from typing import Optional
 from datetime import datetime
 
 
-# модель для создания категории
 class CategoryCreate(BaseModel):
-    name: str = Field(max_length=256)
+    name: str = Field(max_length=256, min_length=3)
     description: str
-    slug: str = Field(max_length=64, pattern=r'^[a-zA-Z0-9_-]+$')
+    slug: str = Field(max_length=64, min_length=3, pattern=r'^[a-zA-Z0-9_-]+$')
     is_published: bool = True
 
-# модель для возврата категории
+
 class CategoryResponse(CategoryCreate):
     id: int
     created_at: datetime
@@ -18,9 +17,10 @@ class CategoryResponse(CategoryCreate):
     class Config:
         from_attributes = True
 
-# модель для обновления категории
+
 class CategoryUpdate(BaseModel):
-    name: Optional[str] = Field(default=None, max_length=256)
+    name: Optional[str] = Field(default=None, max_length=256, min_length=3)
     description: Optional[str] = None
-    slug: Optional[str] = Field(default=None, max_length=64, pattern=r'^[a-zA-Z0-9_-]+$')
+    slug: Optional[str] = Field(default=None, max_length=64,
+                                min_length=3, pattern=r'^[a-zA-Z0-9_-]+$')
     is_published: Optional[bool] = None
