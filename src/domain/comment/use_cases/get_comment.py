@@ -1,5 +1,3 @@
-from fastapi import HTTPException, status
-
 from infrastructure.sqlite.database import database
 from infrastructure.sqlite.repositories import CommentRepository, PostRepository
 from schemas.comment import CommentResponse

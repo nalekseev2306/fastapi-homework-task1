@@ -18,7 +18,7 @@ class CategoryNotFoundException(BaseDomainException):
 class CategoryNotFoundBySlugException(BaseDomainException):
     _text_template = "Category with slug '{slug}' not found"
 
-    def __init__(self, slug: int) -> None:
+    def __init__(self, slug: str) -> None:
         self._text_template = self._text_template.format(slug=slug)
 
         super().__init__(detail=self._text_template)
@@ -27,7 +27,7 @@ class CategoryNotFoundBySlugException(BaseDomainException):
 class CategoryWithSlugAlreadyExistException(BaseDomainException):
     _text_template = "Category with slug '{slug}' already exist"
 
-    def __init__(self, slug: int) -> None:
+    def __init__(self, slug: str) -> None:
         self._text_template = self._text_template.format(slug=slug)
 
         super().__init__(detail=self._text_template)
@@ -38,6 +38,33 @@ class CommentNotFoundException(BaseDomainException):
 
     def __init__(self, id: int) -> None:
         self._text_template = self._text_template.format(id=id)
+
+        super().__init__(detail=self._text_template)
+
+
+class LocationNotFoundException(BaseDomainException):
+    _text_template = "Location with ID '{id}' not found"
+
+    def __init__(self, id: int) -> None:
+        self._text_template = self._text_template.format(id=id)
+
+        super().__init__(detail=self._text_template)
+
+
+class LocationNotFoundByNameException(BaseDomainException):
+    _text_template = "Location with name '{name}' not found"
+
+    def __init__(self, name: str) -> None:
+        self._text_template = self._text_template.format(name=name)
+
+        super().__init__(detail=self._text_template)
+
+
+class LocationWithNameAlreadyExistException(BaseDomainException):
+    _text_template = "Location with name '{name}' already exist"
+
+    def __init__(self, name: str) -> None:
+        self._text_template = self._text_template.format(name=name)
 
         super().__init__(detail=self._text_template)
 

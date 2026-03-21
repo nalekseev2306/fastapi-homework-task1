@@ -1,12 +1,9 @@
-from fastapi import HTTPException, status
-
 from infrastructure.sqlite.database import database
 from infrastructure.sqlite.repositories import CategoryRepository
 from schemas.category import CategoryResponse, CategoryUpdate
 from core.exceptions.database_exceptions import NotFoundException
 from core.exceptions.domain_exceptions import (
     CategoryNotFoundException,
-    CategoryNotFoundBySlugException,
     CategoryWithSlugAlreadyExistException
 )
 

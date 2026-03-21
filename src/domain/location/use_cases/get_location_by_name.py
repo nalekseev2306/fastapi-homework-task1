@@ -1,8 +1,8 @@
-from fastapi import HTTPException, status
-
 from infrastructure.sqlite.database import database
 from infrastructure.sqlite.repositories import LocationRepository
 from schemas.location import LocationResponse
+from core.exceptions.database_exceptions import NotFoundException
+from core.exceptions.domain_exceptions import LocationNotFoundByNameException
 
 
 class GetLocationBySlugUseCase:
@@ -13,11 +13,9 @@ class GetLocationBySlugUseCase:
         with self._database.session() as session:
             repo = LocationRepository(session)
 
-            location = repo.get_by_name(name)
-            if not location:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f'Location with name "{name}" not found'
-                )
+            try:
+                location = repo.get_by_name(name)
+            except:
+                raise LocationNotFoundByNameException(name=name)
 
             return LocationResponse.model_validate(location)

@@ -1,8 +1,8 @@
-from fastapi import HTTPException, status
-
 from infrastructure.sqlite.database import database
 from infrastructure.sqlite.repositories import LocationRepository
 from schemas.location import LocationResponse, LocationCreate
+from core.exceptions.database_exceptions import AlreadyExistsException
+from core.exceptions.domain_exceptions import LocationWithNameAlreadyExistException
 
 
 class CreateLocationUseCase:
@@ -13,11 +13,9 @@ class CreateLocationUseCase:
         with self._database.session() as session:
             repo = LocationRepository(session)
 
-            if repo.get_by_name(location_data.name):
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f'Location with name "{location_data.name}" already exists'
-                )
-
-            new_location = repo.create(location_data)
+            try:
+                new_location = repo.create(location_data)
+            except AlreadyExistsException:
+                raise LocationWithNameAlreadyExistException(location_data.name)
+                
             return LocationResponse.model_validate(new_location)

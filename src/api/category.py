@@ -38,7 +38,7 @@ async def get_category(
 
 @router.get('/categories/by-slug/{slug}', response_model=CategoryResponse,
             status_code=status.HTTP_200_OK)
-async def get_category_by_categoryname(
+async def get_category_by_slug(
     slug: str,
     use_case: GetCategoryBySlugUseCase = Depends()
 ) -> CategoryResponse:

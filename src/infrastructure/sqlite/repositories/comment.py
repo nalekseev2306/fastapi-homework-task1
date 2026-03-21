@@ -20,7 +20,7 @@ class CommentRepository:
 
         comment = self._session.scalar(query)
         if not comment:
-            raise NotFoundException
+            raise NotFoundException()
 
         return comment
 
@@ -28,7 +28,8 @@ class CommentRepository:
         return self._session.query(self._model).all()
 
     def create(self, comment_data: CommentCreate) -> Comment:
-        query = (insert(self._model)
+        query = (
+            insert(self._model)
             .values(comment_data.model_dump())
             .returning(self._model)
         )
