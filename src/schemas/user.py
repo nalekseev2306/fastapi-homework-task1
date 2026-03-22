@@ -2,7 +2,6 @@ from pydantic import BaseModel, EmailStr, SecretStr, Field
 from typing import Optional
 
 
-# модель для создания пользователя
 class UserCreate(BaseModel):
     username: str = Field(min_length=3, max_length=64)
     email: EmailStr
@@ -10,7 +9,7 @@ class UserCreate(BaseModel):
     first_name: str = Field(min_length=3, max_length=64)
     last_name: str = Field(min_length=3, max_length=64)
 
-# модель для возврата пользователя
+
 class UserResponse(BaseModel):
     id: int
     username: str
@@ -21,7 +20,7 @@ class UserResponse(BaseModel):
     class Config:
         from_attributes = True
 
-# модель для обновления пользователя
+
 class UserUpdate(BaseModel):
     username: Optional[str] = Field(default=None, min_length=3, max_length=64)
     email: Optional[EmailStr] = None

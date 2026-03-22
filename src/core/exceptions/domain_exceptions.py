@@ -77,6 +77,41 @@ class UserNotFoundException(BaseDomainException):
 
         super().__init__(detail=self._text_template)
 
+class UserNotFoundByUsernameException(BaseDomainException):
+    _text_template = "User with username '{username}' not found"
+
+    def __init__(self, username: str) -> None:
+        self._text_template = self._text_template.format(username=username)
+
+        super().__init__(detail=self._text_template)
+        
+
+class UserNotFoundByEmailException(BaseDomainException):
+    _text_template = "User with email '{email}' not found"
+
+    def __init__(self, email: str) -> None:
+        self._text_template = self._text_template.format(email=email)
+
+        super().__init__(detail=self._text_template)
+
+
+class UserWithUsernameAlreadyExistException(BaseDomainException):
+    _text_template = "User with username '{username}' already exist"
+
+    def __init__(self, username: str) -> None:
+        self._text_template = self._text_template.format(username=username)
+
+        super().__init__(detail=self._text_template)
+
+
+class UserWithEmailAlreadyExistException(BaseDomainException):
+    _text_template = "User with email '{email}' already exist"
+
+    def __init__(self, email: str) -> None:
+        self._text_template = self._text_template.format(email=email)
+
+        super().__init__(detail=self._text_template)
+
 
 class PostNotFoundException(BaseDomainException):
     _text_template = "Post with ID '{id}' not found"

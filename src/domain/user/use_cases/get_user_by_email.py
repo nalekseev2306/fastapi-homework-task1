@@ -1,8 +1,8 @@
-from fastapi import HTTPException, status
-
 from infrastructure.sqlite.database import database
 from infrastructure.sqlite.repositories import UserRepository
 from schemas.user import UserResponse
+from core.exceptions.database_exceptions import NotFoundException
+from core.exceptions.domain_exceptions import UserNotFoundByEmailException
 
 
 class GetUserByEmailUseCase:
@@ -13,11 +13,9 @@ class GetUserByEmailUseCase:
         with self._database.session() as session:
             repo = UserRepository(session)
 
-            user = repo.get_by_email(email)
-            if not user:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f'User with email "{email}" not found'
-                )
-
+            try:
+                user = repo.get_by_email(email)
+            except NotFoundException:
+                raise UserNotFoundByEmailException(email=email)
+            
             return UserResponse.model_validate(user)

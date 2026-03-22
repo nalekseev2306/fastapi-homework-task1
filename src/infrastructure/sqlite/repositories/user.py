@@ -1,8 +1,14 @@
 from typing import Type, List, Optional
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy import select, insert
 
 from infrastructure.sqlite.models import User
 from schemas.user import UserCreate, UserUpdate
+from core.exceptions.database_exceptions import (
+    NotFoundException,
+    AlreadyExistsException
+)
 
 
 class UserRepository:
@@ -11,41 +17,64 @@ class UserRepository:
         self._session = session
 
     def get(self, user_id: int) -> Optional[User]:
-        return (self._session.query(self._model)
-                .where(self._model.id == user_id)
-                .scalar())
+        query = (
+            select(self._model)
+            .where(self._model.id == user_id)
+        )
+
+        user = self._session.scalar(query)
+        if not user:
+            raise NotFoundException()
+        
+        return user
 
     def get_by_username(self, username: str) -> Optional[User]:
-        return (self._session.query(self._model)
-                .where(self._model.username == username)
-                .scalar())
+        query = (
+            select(self._model)
+            .where(self._model.username == username)
+        )
+
+        user = self._session.scalar(query)
+        if not user:
+            raise NotFoundException()
+        
+        return user
     
     def get_by_email(self, email: str) -> Optional[User]:
-        return (self._session.query(self._model)
-                .where(self._model.email == email)
-                .scalar())
+        query = (
+            select(self._model)
+            .where(self._model.email == email)
+        )
+
+        user = self._session.scalar(query)
+        if not user:
+            raise NotFoundException()
+        
+        return user
 
     def get_all(self) -> List[User]:
         return self._session.query(self._model).all()
 
     def create(self, user_data: UserCreate) -> User:
-        user = self._model(
-            username=user_data.username,
-            email=user_data.email,
-            password=user_data.password.get_secret_value(),
-            first_name=user_data.first_name,
-            last_name=user_data.last_name
+        data = user_data.model_dump()
+        data['password'] = user_data.password.get_secret_value()
+        
+        query = (
+            insert(self._model)
+            .values(data)
+            .returning(self._model)
         )
-        self._session.add(user)
-        self._session.commit()
-        self._session.refresh(user)
+
+        try:
+            user = self._session.scalar(query)
+        except IntegrityError:
+            raise AlreadyExistsException()
+
         return user
 
     def update(self, user_id: int, user_data: UserUpdate) -> Optional[User]:
         user = self.get(user_id)
-        if not user:
-            return None
-        
+
         update_data = user_data.model_dump(exclude_unset=True)
         for key, value in update_data.items():
             if hasattr(user, key):
@@ -60,8 +89,6 @@ class UserRepository:
 
     def delete(self, user_id: int) -> bool:
         user = self.get(user_id)
-        if not user:
-            return False
         
         self._session.delete(user)
         self._session.commit()

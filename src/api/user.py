@@ -1,8 +1,15 @@
 from typing import List
-from fastapi import APIRouter, status, Depends
+from fastapi import APIRouter, status, Depends, HTTPException
 
 from schemas.user import UserResponse, UserCreate, UserUpdate
 from domain.user.use_cases import *
+from core.exceptions.domain_exceptions import (
+    UserNotFoundException,
+    UserNotFoundByUsernameException,
+    UserWithUsernameAlreadyExistException,
+    UserNotFoundByEmailException,
+    UserWithEmailAlreadyExistException
+)
 
 
 router = APIRouter()
@@ -22,7 +29,13 @@ async def get_user(
     user_id: int,
     use_case: GetUserUseCase = Depends()
 ) -> UserResponse:
-    return await use_case.execute(user_id=user_id)
+    try:
+        return await use_case.execute(user_id=user_id)
+    except UserNotFoundException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=exc.get_detail()
+        )
 
 
 @router.get('/users/by-username/{username}', response_model=UserResponse,
@@ -31,7 +44,13 @@ async def get_user_by_username(
     username: str,
     use_case: GetUserByUsernameUseCase = Depends()
 ) -> UserResponse:
-    return await use_case.execute(username=username)
+    try:
+        return await use_case.execute(username=username)
+    except UserNotFoundByUsernameException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=exc.get_detail()
+        )
 
 
 @router.get('/users/by-email/{email}', response_model=UserResponse,
@@ -40,7 +59,13 @@ async def get_user_by_email(
     email: str,
     use_case: GetUserByEmailUseCase = Depends()
 ) -> UserResponse:
-    return await use_case.execute(email=email)
+    try:
+        return await use_case.execute(email=email)
+    except UserNotFoundByEmailException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=exc.get_detail()
+        )
 
 
 @router.post('/users/', response_model=UserResponse,
@@ -49,7 +74,18 @@ async def create_user(
     user_data: UserCreate,
     use_case: CreateUserUseCase = Depends()
 ) -> UserResponse:
-    return await use_case.execute(user_data=user_data)
+    try:
+        return await use_case.execute(user_data=user_data)
+    except UserWithUsernameAlreadyExistException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=exc.get_detail()
+        )
+    except UserWithEmailAlreadyExistException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=exc.get_detail()
+        )
 
 
 @router.put('/users/{user_id}', response_model=UserResponse,
@@ -59,7 +95,23 @@ async def update_user(
     user_data: UserUpdate,
     use_case: UpdateUserUseCase = Depends()
 ) -> UserResponse:
-    return await use_case.execute(user_id=user_id, user_data=user_data)
+    try:
+        return await use_case.execute(user_id=user_id, user_data=user_data)
+    except UserNotFoundException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=exc.get_detail()
+        )
+    except UserWithUsernameAlreadyExistException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=exc.get_detail()
+        )
+    except UserWithEmailAlreadyExistException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=exc.get_detail()
+        )
 
 
 @router.delete('/users/{user_id}', response_model=None,
@@ -68,4 +120,10 @@ async def delete_user(
     user_id: int,
     use_case: DeleteUserUseCase = Depends()
 ) -> None:
-    return await use_case.execute(user_id=user_id)
+    try:
+        return await use_case.execute(user_id=user_id)
+    except UserNotFoundException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=exc.get_detail()
+        )
