@@ -9,12 +9,8 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent / 'src'))
 
 from infrastructure.sqlite.database import Base
-from infrastructure.sqlite.models import User, Post, Category, Location, Comment
-# from infrastructure.sqlite.models.user import User
-# from infrastructure.sqlite.models.post import Post
-# from infrastructure.sqlite.models.category import Category
-# from infrastructure.sqlite.models.location import Location
-# from infrastructure.sqlite.models.comment import Comment
+from infrastructure.sqlite.models import *
+
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -76,7 +72,9 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection,
+            target_metadata=target_metadata,
+            render_as_batch=True,  # нужно для sqlite
         )
 
         with context.begin_transaction():
