@@ -7,19 +7,36 @@ from fastapi import HTTPException, status
 class TitleValidatorMixin:
     @field_validator("title", mode="before")
     @staticmethod
-    def check_title(title: str):
-        if not title:
+    def validate_title(title: str):
+        if title is None:
+            return title
+        
+        if not title or not title.strip():
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-                detail="Title cannot be blank"
+                detail="Title cannot be empty or whitespace"
             )
         
-        return title
+        stripped = title.strip()
+        
+        if len(stripped) < 3:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="Title must be at least 3 characters long"
+            )
+        
+        if len(stripped) > 256:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="Title cannot exceed 256 characters"
+            )
+        
+        return stripped
 
 
 class PostCreate(BaseModel, TitleValidatorMixin):
-    title: str = Field(max_length=256, min_length=3)
-    text: str
+    title: str
+    text: Optional[str] = None
     pub_date: datetime
     user_id: int # временно, пока нет авторизации
     location_id: int
@@ -37,7 +54,7 @@ class PostResponse(PostCreate):
 
 
 class PostUpdate(BaseModel, TitleValidatorMixin):
-    title: Optional[str] = Field(default=None, max_length=256)
+    title: Optional[str] = Field(default=None)
     text: Optional[str] = None
     pub_date: Optional[datetime] = None
     location_id: Optional[int] = None

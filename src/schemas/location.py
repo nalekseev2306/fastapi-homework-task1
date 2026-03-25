@@ -1,22 +1,39 @@
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, field_validator
 from datetime import datetime
 from fastapi import HTTPException, status
 
 
 class LocationCreate(BaseModel):
-    name: str = Field(max_length=256, min_length=3)
+    name: str
     is_published: bool = True
 
     @field_validator("name", mode="before")
     @staticmethod
-    def check_name(name: str):
-        if not name:
+    def validate_name(name: str):
+        if name is None:
+            return name
+        
+        if not name or not name.strip():
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-                detail="Name cannot be blank"
+                detail="Name cannot be empty or whitespace"
             )
-
-        return name
+        
+        stripped = name.strip()
+        
+        if len(stripped) < 3:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="Name must be at least 3 characters long"
+            )
+        
+        if len(stripped) > 256:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="Name cannot exceed 256 characters"
+            )
+        
+        return stripped
 
 
 class LocationResponse(LocationCreate):

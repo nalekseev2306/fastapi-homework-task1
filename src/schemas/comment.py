@@ -7,17 +7,17 @@ from fastapi import HTTPException, status
 class TextValidatorMixin:
     @field_validator("text", mode="before")
     @staticmethod
-    def check_text(text: Optional[str]) -> Optional[str]:
-        if text is None:
-            return text
-
-        if not text:
+    def validate_text(value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return value
+        
+        if not value or not value.strip():
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-                detail="Text cannot be blank"
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Name cannot be empty or whitespace"
             )
         
-        return text
+        return value.strip()
 
 
 class CommentCreate(BaseModel, TextValidatorMixin):
