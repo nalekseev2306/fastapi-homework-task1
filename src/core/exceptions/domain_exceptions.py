@@ -1,9 +1,17 @@
+from fastapi import status
+
+
 class BaseDomainException(Exception):
-    def __init__(self, detail: str | None = None) -> None:
+    def __init__(self, detail: str | None = None,
+                 status_code: None = None) -> None:
         self._detail = detail
+        self._status_code = status_code
 
     def get_detail(self) -> str:
         return self._detail
+    
+    def get_status_code(self) -> status:
+        return self._status_code
 
 
 class CategoryNotFoundException(BaseDomainException):
@@ -12,7 +20,8 @@ class CategoryNotFoundException(BaseDomainException):
     def __init__(self, id: int) -> None:
         self._text_template = self._text_template.format(id=id)
 
-        super().__init__(detail=self._text_template)
+        super().__init__(detail=self._text_template,
+                         status_code=status.HTTP_404_NOT_FOUND)
 
 
 class CategoryNotFoundBySlugException(BaseDomainException):
@@ -21,7 +30,8 @@ class CategoryNotFoundBySlugException(BaseDomainException):
     def __init__(self, slug: str) -> None:
         self._text_template = self._text_template.format(slug=slug)
 
-        super().__init__(detail=self._text_template)
+        super().__init__(detail=self._text_template,
+                         status_code=status.HTTP_404_NOT_FOUND)
 
 
 class CategoryWithSlugAlreadyExistException(BaseDomainException):
@@ -30,7 +40,8 @@ class CategoryWithSlugAlreadyExistException(BaseDomainException):
     def __init__(self, slug: str) -> None:
         self._text_template = self._text_template.format(slug=slug)
 
-        super().__init__(detail=self._text_template)
+        super().__init__(detail=self._text_template,
+                         status_code=status.HTTP_409_CONFLICT)
 
 
 class CommentNotFoundException(BaseDomainException):
@@ -39,7 +50,8 @@ class CommentNotFoundException(BaseDomainException):
     def __init__(self, id: int) -> None:
         self._text_template = self._text_template.format(id=id)
 
-        super().__init__(detail=self._text_template)
+        super().__init__(detail=self._text_template,
+                         status_code=status.HTTP_404_NOT_FOUND)
 
 
 class LocationNotFoundException(BaseDomainException):
@@ -48,7 +60,8 @@ class LocationNotFoundException(BaseDomainException):
     def __init__(self, id: int) -> None:
         self._text_template = self._text_template.format(id=id)
 
-        super().__init__(detail=self._text_template)
+        super().__init__(detail=self._text_template,
+                         status_code=status.HTTP_404_NOT_FOUND)
 
 
 class LocationNotFoundByNameException(BaseDomainException):
@@ -57,7 +70,8 @@ class LocationNotFoundByNameException(BaseDomainException):
     def __init__(self, name: str) -> None:
         self._text_template = self._text_template.format(name=name)
 
-        super().__init__(detail=self._text_template)
+        super().__init__(detail=self._text_template,
+                         status_code=status.HTTP_404_NOT_FOUND)
 
 
 class LocationWithNameAlreadyExistException(BaseDomainException):
@@ -66,7 +80,8 @@ class LocationWithNameAlreadyExistException(BaseDomainException):
     def __init__(self, name: str) -> None:
         self._text_template = self._text_template.format(name=name)
 
-        super().__init__(detail=self._text_template)
+        super().__init__(detail=self._text_template,
+                         status_code=status.HTTP_409_CONFLICT)
 
 
 class UserNotFoundException(BaseDomainException):
@@ -75,7 +90,9 @@ class UserNotFoundException(BaseDomainException):
     def __init__(self, id: int) -> None:
         self._text_template = self._text_template.format(id=id)
 
-        super().__init__(detail=self._text_template)
+        super().__init__(detail=self._text_template,
+                         status_code=status.HTTP_404_NOT_FOUND)
+
 
 class UserNotFoundByUsernameException(BaseDomainException):
     _text_template = "User with username '{username}' not found"
@@ -83,7 +100,8 @@ class UserNotFoundByUsernameException(BaseDomainException):
     def __init__(self, username: str) -> None:
         self._text_template = self._text_template.format(username=username)
 
-        super().__init__(detail=self._text_template)
+        super().__init__(detail=self._text_template,
+                         status_code=status.HTTP_404_NOT_FOUND)
         
 
 class UserNotFoundByEmailException(BaseDomainException):
@@ -92,7 +110,8 @@ class UserNotFoundByEmailException(BaseDomainException):
     def __init__(self, email: str) -> None:
         self._text_template = self._text_template.format(email=email)
 
-        super().__init__(detail=self._text_template)
+        super().__init__(detail=self._text_template,
+                         status_code=status.HTTP_404_NOT_FOUND)
 
 
 class UserWithUsernameAlreadyExistException(BaseDomainException):
@@ -101,7 +120,8 @@ class UserWithUsernameAlreadyExistException(BaseDomainException):
     def __init__(self, username: str) -> None:
         self._text_template = self._text_template.format(username=username)
 
-        super().__init__(detail=self._text_template)
+        super().__init__(detail=self._text_template,
+                         status_code=status.HTTP_409_CONFLICT)
 
 
 class UserWithEmailAlreadyExistException(BaseDomainException):
@@ -110,7 +130,8 @@ class UserWithEmailAlreadyExistException(BaseDomainException):
     def __init__(self, email: str) -> None:
         self._text_template = self._text_template.format(email=email)
 
-        super().__init__(detail=self._text_template)
+        super().__init__(detail=self._text_template,
+                         status_code=status.HTTP_409_CONFLICT)
 
 
 class PostNotFoundException(BaseDomainException):
@@ -119,5 +140,6 @@ class PostNotFoundException(BaseDomainException):
     def __init__(self, id: int) -> None:
         self._text_template = self._text_template.format(id=id)
 
-        super().__init__(detail=self._text_template)
+        super().__init__(detail=self._text_template,
+                         status_code=status.HTTP_404_NOT_FOUND)
 

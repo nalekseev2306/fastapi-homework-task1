@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, status, Depends, HTTPException
+from fastapi import APIRouter, status, Depends
 
 from schemas.category import CategoryResponse, CategoryCreate, CategoryUpdate
 from domain.category.use_cases import *
@@ -7,6 +7,10 @@ from core.exceptions.domain_exceptions import (
     CategoryNotFoundException,
     CategoryNotFoundBySlugException,
     CategoryWithSlugAlreadyExistException
+)
+from core.exceptions.api_exceptions import (
+    NotFoundByFieldException,
+    AlreadyExistWithFieldException
 )
 
 
@@ -30,11 +34,7 @@ async def get_category(
     try:
         return await use_case.execute(category_id=category_id)
     except CategoryNotFoundException as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=exc.get_detail()
-        )
-
+        raise NotFoundByFieldException(exc)
 
 @router.get('/categories/by-slug/{slug}', response_model=CategoryResponse,
             status_code=status.HTTP_200_OK)
@@ -45,10 +45,7 @@ async def get_category_by_slug(
     try:
         return await use_case.execute(slug=slug)
     except CategoryNotFoundBySlugException as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=exc.get_detail()
-        )
+        raise NotFoundByFieldException(exc)
 
 
 @router.post('/categories/', response_model=CategoryResponse,
@@ -60,10 +57,7 @@ async def create_category(
     try:
         return await use_case.execute(category_data=category_data)
     except CategoryWithSlugAlreadyExistException as exc:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=exc.get_detail()
-        )
+        raise AlreadyExistWithFieldException(exc)
 
 
 @router.put('/categories/{category_id}', response_model=CategoryResponse,
@@ -78,15 +72,9 @@ async def update_category(
             category_id=category_id, category_data=category_data
         )
     except CategoryNotFoundException as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=exc.get_detail()
-        )
+        raise NotFoundByFieldException(exc)
     except CategoryWithSlugAlreadyExistException as exc:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=exc.get_detail()
-        )
+        raise AlreadyExistWithFieldException(exc)
 
 
 @router.delete('/categories/{category_id}', response_model=None,
@@ -98,7 +86,4 @@ async def delete_category(
     try:
         return await use_case.execute(category_id=category_id)
     except CategoryNotFoundException as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=exc.get_detail()
-        )
+        raise NotFoundByFieldException(exc)

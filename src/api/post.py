@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, status, Depends, HTTPException
+from fastapi import APIRouter, status, Depends
 
 from schemas.post import PostResponse, PostCreate, PostUpdate
 from domain.post.use_cases import *
@@ -9,6 +9,7 @@ from core.exceptions.domain_exceptions import (
     CategoryNotFoundException,
     LocationNotFoundException
 )
+from core.exceptions.api_exceptions import NotFoundByFieldException
 
 
 router = APIRouter()
@@ -31,10 +32,8 @@ async def get_post(
     try:
         return await use_case.execute(post_id=post_id)
     except PostNotFoundException as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=exc.get_detail()
-        )
+        raise NotFoundByFieldException(exc)
+
 
 @router.post('/posts/', response_model=PostResponse,
              status_code=status.HTTP_201_CREATED)
@@ -44,21 +43,10 @@ async def create_post(
 ) -> PostResponse:
     try:
         return await use_case.execute(post_data=post_data)
-    except UserNotFoundException as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=exc.get_detail()
-        )
-    except CategoryNotFoundException as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=exc.get_detail()
-        )
-    except LocationNotFoundException as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=exc.get_detail()
-        )
+    except (UserNotFoundException,
+            CategoryNotFoundException,
+            LocationNotFoundException) as exc:
+        raise NotFoundByFieldException(exc)
 
 
 @router.put('/posts/{post_id}', response_model=PostResponse,
@@ -70,21 +58,10 @@ async def update_post(
 ) -> PostResponse:
     try:
         return await use_case.execute(post_id=post_id, post_data=post_data)
-    except PostNotFoundException as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=exc.get_detail()
-        )
-    except CategoryNotFoundException as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=exc.get_detail()
-        )
-    except LocationNotFoundException as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=exc.get_detail()
-        )
+    except (UserNotFoundException,
+            CategoryNotFoundException,
+            LocationNotFoundException) as exc:
+        raise NotFoundByFieldException(exc)
 
 
 @router.delete('/posts/{post_id}', response_model=None,
@@ -96,7 +73,4 @@ async def delete_post(
     try:
         return await use_case.execute(post_id=post_id)
     except PostNotFoundException as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=exc.get_detail()
-        )
+        raise NotFoundByFieldException(exc)

@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, status, Depends, HTTPException
+from fastapi import APIRouter, status, Depends
 
 from schemas.location import LocationResponse, LocationCreate
 from domain.location.use_cases import *
@@ -7,6 +7,10 @@ from core.exceptions.domain_exceptions import (
     LocationWithNameAlreadyExistException,
     LocationNotFoundByNameException,
     LocationNotFoundException
+)
+from core.exceptions.api_exceptions import (
+    NotFoundByFieldException,
+    AlreadyExistWithFieldException
 )
 
 
@@ -30,10 +34,7 @@ async def get_location(
     try:
         return await use_case.execute(location_id=location_id)
     except LocationNotFoundException as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=exc.get_detail()
-        )
+        raise NotFoundByFieldException(exc)
 
 
 @router.get('/locations/by-name/{name}', response_model=LocationResponse,
@@ -45,10 +46,7 @@ async def get_location_by_name(
     try:
         return await use_case.execute(name=name)
     except LocationNotFoundByNameException as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=exc.get_detail()
-        )
+        raise NotFoundByFieldException(exc)
 
 
 @router.post('/locations/', response_model=LocationResponse,
@@ -60,10 +58,7 @@ async def create_location(
     try:
         return await use_case.execute(location_data=location_data)
     except LocationWithNameAlreadyExistException as exc:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=exc.get_detail()
-        )
+        raise AlreadyExistWithFieldException(exc)
 
 
 @router.delete('/locations/{location_id}', response_model=None,
@@ -75,7 +70,4 @@ async def delete_location(
     try:
         return await use_case.execute(location_id=location_id)
     except LocationNotFoundException as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=exc.get_detail()
-        )
+        raise NotFoundByFieldException(exc)

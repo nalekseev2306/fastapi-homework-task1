@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, status, Depends, HTTPException
+from fastapi import APIRouter, status, Depends
 
 from schemas.comment import CommentResponse, CommentCreate, CommentUpdate
 from domain.comment.use_cases import *
@@ -8,6 +8,8 @@ from core.exceptions.domain_exceptions import (
     UserNotFoundException,
     PostNotFoundException
 )
+from core.exceptions.api_exceptions import NotFoundByFieldException
+
 
 # придумать как связать комменты с конкретным постом
 # router = APIRouter(prefix='/comments/{comment_id}')
@@ -31,10 +33,7 @@ async def get_comment(
     try:
         return await use_case.execute(comment_id=comment_id)
     except CommentNotFoundException as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=exc.get_detail()
-        )
+        raise NotFoundByFieldException(exc)
 
 
 @router.post('/comments/', response_model=CommentResponse,
@@ -45,16 +44,8 @@ async def create_comment(
 ) -> CommentResponse:
     try:
         return await use_case.execute(comment_data=comment_data)
-    except UserNotFoundException as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=exc.get_detail()
-        )
-    except PostNotFoundException as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=exc.get_detail()
-        )
+    except (UserNotFoundException, PostNotFoundException) as exc:
+        raise NotFoundByFieldException(exc)
 
 
 @router.put('/comments/{comment_id}', response_model=CommentResponse,
@@ -68,10 +59,8 @@ async def update_comment(
         return await use_case.execute(comment_id=comment_id,
                                       comment_data=comment_data)
     except CommentNotFoundException as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=exc.get_detail()
-        )
+        raise NotFoundByFieldException(exc)
+
 
 
 @router.delete('/comments/{comment_id}', response_model=None,
@@ -83,7 +72,4 @@ async def delete_comment(
     try:
         return await use_case.execute(comment_id=comment_id)
     except CommentNotFoundException as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=exc.get_detail()
-        )
+        raise NotFoundByFieldException(exc)

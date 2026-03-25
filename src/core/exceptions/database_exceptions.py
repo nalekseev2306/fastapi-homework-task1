@@ -1,11 +1,6 @@
-class BaseDatabaseException(Exception):
-    def __init__(self, detail: str | None = None) -> None:
-        self._detail = detail
-
-
-class NotFoundException(BaseDatabaseException):
+class NotFoundException(Exception):
     pass
 
 
-class AlreadyExistsException(BaseDatabaseException):
+class AlreadyExistsException(Exception):
     pass
