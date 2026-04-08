@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, SecretStr, field_validator
+from pydantic import BaseModel, EmailStr, field_validator
 from fastapi import HTTPException, status
 from typing import Optional
 
@@ -48,19 +48,17 @@ class UserValidatorsMixin:
     
     @field_validator("password", mode="before")
     @staticmethod
-    def validate_password(value: Optional[SecretStr]) -> Optional[SecretStr]:
+    def validate_password(value: Optional[str]) -> Optional[str]:
         if value is None:
             return value
         
-        password_str = value.get_secret_value()
-        
-        if not password_str or not password_str.strip():
+        if not value or not value.strip():
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="Password cannot be empty or whitespace"
             )
         
-        if len(password_str) < 6:
+        if len(value) < 6:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="Password must be at least 6 characters long"
@@ -72,7 +70,7 @@ class UserValidatorsMixin:
 class UserCreate(UserValidatorsMixin, BaseModel):
     username: str
     email: EmailStr
-    password: SecretStr
+    password: str
     first_name: str
     last_name: str
 
@@ -81,6 +79,7 @@ class UserResponse(BaseModel):
     id: int
     username: str
     email: str
+    password: str
     first_name: str
     last_name: str
     
@@ -91,6 +90,6 @@ class UserResponse(BaseModel):
 class UserUpdate(UserValidatorsMixin, BaseModel):
     username: Optional[str] = None
     email: Optional[EmailStr] = None
-    password: Optional[SecretStr] = None
+    password: Optional[str] = None
     first_name: Optional[str] = None
     last_name: Optional[str] = None

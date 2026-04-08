@@ -9,6 +9,7 @@ from core.exceptions.domain_exceptions import (
     UserWithUsernameAlreadyExistException,
     UserWithEmailAlreadyExistException
 )
+from resources.auth import get_password_hash
 
 
 class CreateUserUseCase:
@@ -16,6 +17,8 @@ class CreateUserUseCase:
         self._database = database
 
     async def execute(self, user_data: UserCreate) -> UserResponse:
+        user_data.password = get_password_hash(password=user_data.password)
+
         with self._database.session() as session:
             repo = UserRepository(session)
 

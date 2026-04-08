@@ -3,7 +3,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 from api import (
     user_router, post_router, category_router,
-    comment_router, location_router
+    comment_router, location_router, auth_router
 )
 
 
@@ -20,10 +20,11 @@ def create_app() -> FastAPI:
     )
 
     # подключаем роутеры
-    app.include_router(router=user_router, tags=['users'])
-    app.include_router(router=post_router, tags=['posts'])
-    app.include_router(router=category_router, tags=['categories'])
-    app.include_router(router=location_router, tags=['locations'])
-    app.include_router(router=comment_router, tags=['comments'])
+    app.include_router(router=auth_router, tags=["Auth"])
+    app.include_router(router=user_router, tags=['Users'])
+    app.include_router(router=post_router, tags=['Posts'])
+    app.include_router(router=category_router, tags=['Categories'])
+    app.include_router(router=location_router, tags=['Locations'])
+    app.include_router(router=comment_router, tags=['Comments'])
 
     return app

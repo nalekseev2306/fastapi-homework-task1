@@ -57,7 +57,6 @@ class UserRepository:
 
     def create(self, user_data: UserCreate) -> User:
         data = user_data.model_dump()
-        data['password'] = user_data.password.get_secret_value()
         
         query = (
             insert(self._model)
@@ -78,10 +77,7 @@ class UserRepository:
         update_data = user_data.model_dump(exclude_unset=True)
         for key, value in update_data.items():
             if hasattr(user, key):
-                if key == 'password':
-                    setattr(user, key, value.get_secret_value())
-                else:
-                    setattr(user, key, value)
+                setattr(user, key, value)
         
         self._session.commit()
         self._session.refresh(user)

@@ -143,3 +143,12 @@ class PostNotFoundException(BaseDomainException):
         super().__init__(detail=self._text_template,
                          status_code=status.HTTP_404_NOT_FOUND)
 
+
+class InvalidPasswordException(BaseDomainException):
+    _text_template = "Invalid password"
+
+    def __init__(self) -> None:
+        self._text_template = self._text_template
+
+        super().__init__(detail=self._text_template,
+                         status_code=status.HTTP_401_UNAUTHORIZED)
