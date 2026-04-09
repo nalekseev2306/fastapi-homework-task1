@@ -6,9 +6,13 @@ from schemas.user import UserResponse
 from domain.comment.use_cases import *
 from core.exceptions.domain_exceptions import (
     CommentNotFoundException,
-    PostNotFoundException
+    PostNotFoundException,
+    DomainPermissionDeniedException
 )
-from core.exceptions.api_exceptions import NotFoundByFieldException
+from core.exceptions.api_exceptions import (
+    NotFoundByFieldException,
+    PermissionDeniedException
+)
 from services.auth import AuthService
 
 
@@ -57,11 +61,15 @@ async def update_comment(
     use_case: UpdateCommentUseCase = Depends()
 ) -> CommentResponse:
     try:
-        return await use_case.execute(comment_id=comment_id,
-                                      comment_data=comment_data)
+        return await use_case.execute(
+            comment_id=comment_id,
+            comment_data=comment_data,
+            current_user_id=user.id
+        )
+    except DomainPermissionDeniedException as exc:
+        raise PermissionDeniedException(exc)
     except CommentNotFoundException as exc:
         raise NotFoundByFieldException(exc)
-
 
 
 @router.delete('/comments/{comment_id}', response_model=None,
@@ -72,6 +80,11 @@ async def delete_comment(
     use_case: DeleteCommentUseCase = Depends()
 ) -> None:
     try:
-        return await use_case.execute(comment_id=comment_id)
+        return await use_case.execute(
+            comment_id=comment_id,
+            current_user_id=user.id
+        )
+    except DomainPermissionDeniedException as exc:
+        raise PermissionDeniedException(exc)
     except CommentNotFoundException as exc:
         raise NotFoundByFieldException(exc)

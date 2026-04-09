@@ -16,5 +16,3 @@ class DeleteLocationUseCase:
                 repo.delete(location_id)
             except NotFoundException:
                 raise LocationNotFoundException(id=location_id)
-
-            return None

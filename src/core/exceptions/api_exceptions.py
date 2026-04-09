@@ -17,3 +17,8 @@ class NotFoundByFieldException(BaseApiException):
 class AlreadyExistWithFieldException(BaseApiException):
     def __init__(self, exception: BaseDomainException) -> None:
         super().__init__(exception=exception)
+
+
+class PermissionDeniedException(BaseApiException):
+    def __init__(self, exception: BaseDomainException) -> None:
+        super().__init__(exception=exception)

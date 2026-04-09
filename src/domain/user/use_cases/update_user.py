@@ -1,14 +1,12 @@
 from infrastructure.sqlite.database import database
 from infrastructure.sqlite.repositories import UserRepository
 from schemas.user import UserResponse, UserUpdate
-from core.exceptions.database_exceptions import (
-    NotFoundException,
-    AlreadyExistsException
-)
+from core.exceptions.database_exceptions import NotFoundException
 from core.exceptions.domain_exceptions import (
     UserNotFoundException,
     UserWithUsernameAlreadyExistException,
-    UserWithEmailAlreadyExistException
+    UserWithEmailAlreadyExistException,
+    DomainPermissionDeniedException
 )
 
 
@@ -16,7 +14,12 @@ class UpdateUserUseCase:
     def __init__(self):
         self._database = database
 
-    async def execute(self, user_id: int, user_data: UserUpdate) -> UserResponse:
+    async def execute(
+        self,
+        user_id: int,
+        user_data: UserUpdate,
+        current_user_id: int
+    ) -> UserResponse:
         with self._database.session() as session:
             repo = UserRepository(session)
 
@@ -24,6 +27,9 @@ class UpdateUserUseCase:
                 repo.get(user_id)
             except NotFoundException:
                 raise UserNotFoundException(user_id)
+
+            if user_id != current_user_id:
+                raise DomainPermissionDeniedException(method='update', model='users')
 
             if user_data.username:
                 try:

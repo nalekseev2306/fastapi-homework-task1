@@ -152,3 +152,16 @@ class InvalidPasswordException(BaseDomainException):
 
         super().__init__(detail=self._text_template,
                          status_code=status.HTTP_401_UNAUTHORIZED)
+
+
+class DomainPermissionDeniedException(BaseDomainException):
+    _text_template = "You can only {method} your own {model}"
+
+    def __init__(self, method: str, model: str) -> None:
+        self._text_template = self._text_template.format(
+            method=method,
+            model=model
+        )
+
+        super().__init__(detail=self._text_template,
+                         status_code=status.HTTP_403_FORBIDDEN)

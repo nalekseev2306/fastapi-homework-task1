@@ -7,14 +7,20 @@ from core.exceptions.database_exceptions import NotFoundException
 from core.exceptions.domain_exceptions import (
     PostNotFoundException,
     CategoryNotFoundException,
-    LocationNotFoundException
+    LocationNotFoundException,
+    DomainPermissionDeniedException
 )
 
 class UpdatePostUseCase:
     def __init__(self):
         self._database = database
 
-    async def execute(self, post_id: int, post_data: PostUpdate) -> PostResponse:
+    async def execute(
+        self,
+        post_id: int,
+        post_data: PostUpdate,
+        current_user_id: int
+    ) -> PostResponse:
         with self._database.session() as session:
             repo = PostRepository(session)
             category_repo = CategoryRepository(session)
@@ -25,6 +31,9 @@ class UpdatePostUseCase:
             except NotFoundException:
                 raise PostNotFoundException(id=post_id)
             
+            if existing_post.id != current_user_id:
+                raise DomainPermissionDeniedException(method='update', model='posts')
+
             if post_data.category_id and post_data.category_id != existing_post.category_id:
                 try:
                     category_repo.get(post_data.category_id)

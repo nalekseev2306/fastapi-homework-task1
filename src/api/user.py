@@ -8,11 +8,13 @@ from core.exceptions.domain_exceptions import (
     UserNotFoundByUsernameException,
     UserWithUsernameAlreadyExistException,
     UserNotFoundByEmailException,
-    UserWithEmailAlreadyExistException
+    UserWithEmailAlreadyExistException,
+    DomainPermissionDeniedException
 )
 from core.exceptions.api_exceptions import (
     NotFoundByFieldException,
-    AlreadyExistWithFieldException
+    AlreadyExistWithFieldException,
+    PermissionDeniedException
 )
 from services.auth import AuthService
 
@@ -86,7 +88,13 @@ async def update_user(
     use_case: UpdateUserUseCase = Depends()
 ) -> UserResponse:
     try:
-        return await use_case.execute(user_id=user_id, user_data=user_data)
+        return await use_case.execute(
+            user_id=user_id,
+            user_data=user_data,
+            current_user_id=user.id
+        )
+    except DomainPermissionDeniedException as exc:
+        raise PermissionDeniedException(exc)
     except UserNotFoundException as exc:
         raise NotFoundByFieldException(exc)
     except (UserWithUsernameAlreadyExistException,
@@ -102,6 +110,11 @@ async def delete_user(
     use_case: DeleteUserUseCase = Depends()
 ) -> None:
     try:
-        return await use_case.execute(user_id=user_id)
+        return await use_case.execute(
+            user_id=user_id,
+            current_user_id=user.id
+        )
+    except DomainPermissionDeniedException as exc:
+        raise PermissionDeniedException(exc)
     except UserNotFoundException as exc:
         raise NotFoundByFieldException(exc)

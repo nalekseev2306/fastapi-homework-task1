@@ -6,11 +6,14 @@ from schemas.user import UserResponse
 from domain.post.use_cases import *
 from core.exceptions.domain_exceptions import (
     PostNotFoundException,
-    UserNotFoundException,
     CategoryNotFoundException,
-    LocationNotFoundException
+    LocationNotFoundException,
+    DomainPermissionDeniedException
 )
-from core.exceptions.api_exceptions import NotFoundByFieldException
+from core.exceptions.api_exceptions import (
+    NotFoundByFieldException,
+    PermissionDeniedException
+)
 from services.auth import AuthService
 
 
@@ -60,9 +63,14 @@ async def update_post(
     use_case: UpdatePostUseCase = Depends()
 ) -> PostResponse:
     try:
-        return await use_case.execute(post_id=post_id, post_data=post_data)
-    except (UserNotFoundException,
-            CategoryNotFoundException,
+        return await use_case.execute(
+            post_id=post_id,
+            post_data=post_data,
+            current_user_id=user.id
+        )
+    except DomainPermissionDeniedException as exc:
+        raise PermissionDeniedException(exc)
+    except (CategoryNotFoundException,
             LocationNotFoundException) as exc:
         raise NotFoundByFieldException(exc)
 
@@ -75,6 +83,11 @@ async def delete_post(
     use_case: DeletePostUseCase = Depends()
 ) -> None:
     try:
-        return await use_case.execute(post_id=post_id)
+        return await use_case.execute(
+            post_id=post_id,
+            current_user_id=user.id
+        )
+    except DomainPermissionDeniedException as exc:
+        raise PermissionDeniedException(exc)
     except PostNotFoundException as exc:
         raise NotFoundByFieldException(exc)
