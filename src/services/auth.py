@@ -32,11 +32,11 @@ class AuthService:
         except JWTError:
             raise CredentialsException(detail=AUTH_EXCEPTION_MESSAGE)
             
-        try:
-            with _database.session() as session:
+        with _database.session() as session:
+            try:
                 repo = UserRepository(session)
                 user = repo.get_by_username(username=username)
-        except NotFoundException:
-            raise CredentialsException(detail=AUTH_EXCEPTION_MESSAGE)
+            except NotFoundException:
+                raise CredentialsException(detail=AUTH_EXCEPTION_MESSAGE)
 
-        return UserResponse.model_validate(obj=user)           
+            return UserResponse.model_validate(obj=user)           

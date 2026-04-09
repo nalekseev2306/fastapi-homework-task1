@@ -14,6 +14,7 @@ from core.exceptions.api_exceptions import (
     NotFoundByFieldException,
     AlreadyExistWithFieldException
 )
+from services.auth import AuthService
 
 
 router = APIRouter()
@@ -43,10 +44,11 @@ async def get_user(
             status_code=status.HTTP_200_OK)
 async def get_user_by_username(
     username: str,
+    user: UserResponse = Depends(AuthService.get_current_user),
     use_case: GetUserByUsernameUseCase = Depends()
 ) -> UserResponse:
     try:
-        return await use_case.execute(username=username)
+        return await use_case.execute(username=username, current_user=user)
     except UserNotFoundByUsernameException as exc:
         raise NotFoundByFieldException(exc)
 

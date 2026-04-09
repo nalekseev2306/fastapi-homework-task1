@@ -25,7 +25,7 @@ class GetUserByUsernameUseCase:
                 user = repo.get_by_username(username)
             except NotFoundException:
                 error = UserNotFoundByUsernameException(username=username)
-                logger.error(f'User {current_user.usernmae} make error: {error.get_detail()}')
+                logger.error(f'User {current_user.username} make error: {error.get_detail()}')
                 raise error
 
             return UserResponse.model_validate(user)
