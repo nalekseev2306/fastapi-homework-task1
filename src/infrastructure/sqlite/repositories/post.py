@@ -27,10 +27,10 @@ class PostRepository:
     def get_all(self) -> List[Post]:
         return self._session.query(self._model).all()
 
-    def create(self, post_data: PostCreate) -> Post:
+    def create(self, post_data: PostCreate, author_id: int) -> Post:
         query = (
             insert(self._model)
-            .values(post_data.model_dump())
+            .values(**post_data.model_dump(), user_id=author_id)
             .returning(self._model)
         )
 

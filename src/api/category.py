@@ -2,6 +2,7 @@ from typing import List
 from fastapi import APIRouter, status, Depends
 
 from schemas.category import CategoryResponse, CategoryCreate, CategoryUpdate
+from schemas.user import UserResponse
 from domain.category.use_cases import *
 from core.exceptions.domain_exceptions import (
     CategoryNotFoundException,
@@ -12,6 +13,7 @@ from core.exceptions.api_exceptions import (
     NotFoundByFieldException,
     AlreadyExistWithFieldException
 )
+from services.auth import AuthService
 
 
 router = APIRouter()
@@ -36,6 +38,7 @@ async def get_category(
     except CategoryNotFoundException as exc:
         raise NotFoundByFieldException(exc)
 
+
 @router.get('/categories/by-slug/{slug}', response_model=CategoryResponse,
             status_code=status.HTTP_200_OK)
 async def get_category_by_slug(
@@ -52,6 +55,7 @@ async def get_category_by_slug(
              status_code=status.HTTP_201_CREATED)
 async def create_category(
     category_data: CategoryCreate,
+    user: UserResponse = Depends(AuthService.get_current_user),
     use_case: CreateCategoryUseCase = Depends()
 ) -> CategoryResponse:
     try:
@@ -65,6 +69,7 @@ async def create_category(
 async def update_category(
     category_id: int,
     category_data: CategoryUpdate,
+    user: UserResponse = Depends(AuthService.get_current_user),
     use_case: UpdateCategoryUseCase = Depends()
 ) -> CategoryResponse:
     try:
@@ -81,6 +86,7 @@ async def update_category(
                status_code=status.HTTP_204_NO_CONTENT)
 async def delete_category(
     category_id: int,
+    user: UserResponse = Depends(AuthService.get_current_user),
     use_case: DeleteCategoryUseCase = Depends()
 ) -> None:
     try:

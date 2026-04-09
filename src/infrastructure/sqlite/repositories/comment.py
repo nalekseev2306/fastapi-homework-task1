@@ -27,10 +27,10 @@ class CommentRepository:
     def get_all(self) -> List[Comment]:
         return self._session.query(self._model).all()
 
-    def create(self, comment_data: CommentCreate) -> Comment:
+    def create(self, comment_data: CommentCreate, author_id: int) -> Comment:
         query = (
             insert(self._model)
-            .values(comment_data.model_dump())
+            .values(**comment_data.model_dump(), user_id=author_id)
             .returning(self._model)
         )
 

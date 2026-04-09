@@ -2,6 +2,7 @@ from typing import List
 from fastapi import APIRouter, status, Depends
 
 from schemas.location import LocationResponse, LocationCreate
+from schemas.user import UserResponse
 from domain.location.use_cases import *
 from core.exceptions.domain_exceptions import (
     LocationWithNameAlreadyExistException,
@@ -12,6 +13,7 @@ from core.exceptions.api_exceptions import (
     NotFoundByFieldException,
     AlreadyExistWithFieldException
 )
+from services.auth import AuthService
 
 
 router = APIRouter()
@@ -53,6 +55,7 @@ async def get_location_by_name(
              status_code=status.HTTP_201_CREATED)
 async def create_location(
     location_data: LocationCreate,
+    user: UserResponse = Depends(AuthService.get_current_user),
     use_case: CreateLocationUseCase = Depends()
 ) -> LocationResponse:
     try:
@@ -65,6 +68,7 @@ async def create_location(
                status_code=status.HTTP_204_NO_CONTENT)
 async def delete_location(
     location_id: int,
+    user: UserResponse = Depends(AuthService.get_current_user),
     use_case: DeleteLocationUseCase = Depends()
 ) -> None:
     try:

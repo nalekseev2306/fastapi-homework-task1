@@ -2,6 +2,7 @@ from typing import List
 from fastapi import APIRouter, status, Depends
 
 from schemas.post import PostResponse, PostCreate, PostUpdate
+from schemas.user import UserResponse
 from domain.post.use_cases import *
 from core.exceptions.domain_exceptions import (
     PostNotFoundException,
@@ -10,6 +11,7 @@ from core.exceptions.domain_exceptions import (
     LocationNotFoundException
 )
 from core.exceptions.api_exceptions import NotFoundByFieldException
+from services.auth import AuthService
 
 
 router = APIRouter()
@@ -39,12 +41,12 @@ async def get_post(
              status_code=status.HTTP_201_CREATED)
 async def create_post(
     post_data: PostCreate,
+    user: UserResponse = Depends(AuthService.get_current_user),
     use_case: CreatePostUseCase = Depends()
 ) -> PostResponse:
     try:
-        return await use_case.execute(post_data=post_data)
-    except (UserNotFoundException,
-            CategoryNotFoundException,
+        return await use_case.execute(post_data=post_data, author_id=user.id)
+    except (CategoryNotFoundException,
             LocationNotFoundException) as exc:
         raise NotFoundByFieldException(exc)
 
@@ -54,6 +56,7 @@ async def create_post(
 async def update_post(
     post_id: int,
     post_data: PostUpdate,
+    user: UserResponse = Depends(AuthService.get_current_user),
     use_case: UpdatePostUseCase = Depends()
 ) -> PostResponse:
     try:
@@ -68,6 +71,7 @@ async def update_post(
                status_code=status.HTTP_204_NO_CONTENT)
 async def delete_post(
     post_id: int,
+    user: UserResponse = Depends(AuthService.get_current_user),
     use_case: DeletePostUseCase = Depends()
 ) -> None:
     try:

@@ -2,17 +2,16 @@ from typing import List
 from fastapi import APIRouter, status, Depends
 
 from schemas.comment import CommentResponse, CommentCreate, CommentUpdate
+from schemas.user import UserResponse
 from domain.comment.use_cases import *
 from core.exceptions.domain_exceptions import (
     CommentNotFoundException,
-    UserNotFoundException,
     PostNotFoundException
 )
 from core.exceptions.api_exceptions import NotFoundByFieldException
+from services.auth import AuthService
 
 
-# придумать как связать комменты с конкретным постом
-# router = APIRouter(prefix='/comments/{comment_id}')
 router = APIRouter()
 
 
@@ -40,11 +39,12 @@ async def get_comment(
              status_code=status.HTTP_201_CREATED)
 async def create_comment(
     comment_data: CommentCreate,
+    user: UserResponse = Depends(AuthService.get_current_user),
     use_case: CreateCommentUseCase = Depends()
 ) -> CommentResponse:
     try:
-        return await use_case.execute(comment_data=comment_data)
-    except (UserNotFoundException, PostNotFoundException) as exc:
+        return await use_case.execute(comment_data=comment_data, author_id=user.id)
+    except PostNotFoundException as exc:
         raise NotFoundByFieldException(exc)
 
 
@@ -53,6 +53,7 @@ async def create_comment(
 async def update_comment(
     comment_id: int,
     comment_data: CommentUpdate,
+    user: UserResponse = Depends(AuthService.get_current_user),
     use_case: UpdateCommentUseCase = Depends()
 ) -> CommentResponse:
     try:
@@ -67,6 +68,7 @@ async def update_comment(
                status_code=status.HTTP_204_NO_CONTENT)
 async def delete_comment(
     comment_id: int,
+    user: UserResponse = Depends(AuthService.get_current_user),
     use_case: DeleteCommentUseCase = Depends()
 ) -> None:
     try:

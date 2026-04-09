@@ -44,11 +44,10 @@ async def get_user(
             status_code=status.HTTP_200_OK)
 async def get_user_by_username(
     username: str,
-    user: UserResponse = Depends(AuthService.get_current_user),
     use_case: GetUserByUsernameUseCase = Depends()
 ) -> UserResponse:
     try:
-        return await use_case.execute(username=username, current_user=user)
+        return await use_case.execute(username=username)
     except UserNotFoundByUsernameException as exc:
         raise NotFoundByFieldException(exc)
 
@@ -83,6 +82,7 @@ async def create_user(
 async def update_user(
     user_id: int,
     user_data: UserUpdate,
+    user: UserResponse = Depends(AuthService.get_current_user),
     use_case: UpdateUserUseCase = Depends()
 ) -> UserResponse:
     try:
@@ -98,6 +98,7 @@ async def update_user(
                status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(
     user_id: int,
+    user: UserResponse = Depends(AuthService.get_current_user),
     use_case: DeleteUserUseCase = Depends()
 ) -> None:
     try:

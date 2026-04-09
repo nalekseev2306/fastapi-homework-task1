@@ -22,7 +22,6 @@ class TextValidatorMixin:
 
 class CommentCreate(BaseModel, TextValidatorMixin):
     text: str
-    user_id: int # временно, пока нет авторизации
     post_id: int
 
 

@@ -38,7 +38,6 @@ class PostCreate(BaseModel, TitleValidatorMixin):
     title: str
     text: Optional[str] = None
     pub_date: datetime
-    user_id: int # временно, пока нет авторизации
     location_id: int
     category_id: int
     # image: Optional[str] = None
@@ -47,7 +46,7 @@ class PostCreate(BaseModel, TitleValidatorMixin):
 
 class PostResponse(PostCreate):
     id: int
-    # user_id: int
+    user_id: int
 
     class Config:
         from_attributes = True
