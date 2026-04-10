@@ -1,5 +1,6 @@
 from infrastructure.sqlite.database import database
 from infrastructure.sqlite.repositories import PostRepository
+from schemas.user import UserResponse
 from core.exceptions.database_exceptions import NotFoundException
 from core.exceptions.domain_exceptions import (
     PostNotFoundException,
@@ -14,7 +15,7 @@ class DeletePostUseCase:
     async def execute(
         self,
         post_id: int,
-        current_user_id: int
+        current_user: UserResponse
     ) -> None:
         with self._database.session() as session:
             repo = PostRepository(session)
@@ -24,7 +25,7 @@ class DeletePostUseCase:
             except NotFoundException:
                 raise PostNotFoundException(id=post_id)
 
-            if post.user_id != current_user_id:
+            if not current_user.is_superuser and post.user_id != current_user.id:
                 raise DomainPermissionDeniedException(method='delete', model='posts')
 
             repo.delete(post_id)

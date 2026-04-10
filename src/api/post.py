@@ -66,7 +66,7 @@ async def update_post(
         return await use_case.execute(
             post_id=post_id,
             post_data=post_data,
-            current_user_id=user.id
+            current_user=user
         )
     except DomainPermissionDeniedException as exc:
         raise PermissionDeniedException(exc)
@@ -85,7 +85,7 @@ async def delete_post(
     try:
         return await use_case.execute(
             post_id=post_id,
-            current_user_id=user.id
+            current_user=user
         )
     except DomainPermissionDeniedException as exc:
         raise PermissionDeniedException(exc)

@@ -91,7 +91,7 @@ async def update_user(
         return await use_case.execute(
             user_id=user_id,
             user_data=user_data,
-            current_user_id=user.id
+            current_user=user
         )
     except DomainPermissionDeniedException as exc:
         raise PermissionDeniedException(exc)
@@ -112,7 +112,7 @@ async def delete_user(
     try:
         return await use_case.execute(
             user_id=user_id,
-            current_user_id=user.id
+            current_user=user
         )
     except DomainPermissionDeniedException as exc:
         raise PermissionDeniedException(exc)

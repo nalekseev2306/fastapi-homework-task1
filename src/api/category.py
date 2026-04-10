@@ -7,11 +7,13 @@ from domain.category.use_cases import *
 from core.exceptions.domain_exceptions import (
     CategoryNotFoundException,
     CategoryNotFoundBySlugException,
-    CategoryWithSlugAlreadyExistException
+    CategoryWithSlugAlreadyExistException,
+    NotEnoughRightsException
 )
 from core.exceptions.api_exceptions import (
     NotFoundByFieldException,
-    AlreadyExistWithFieldException
+    AlreadyExistWithFieldException,
+    PermissionDeniedException
 )
 from services.auth import AuthService
 
@@ -59,7 +61,12 @@ async def create_category(
     use_case: CreateCategoryUseCase = Depends()
 ) -> CategoryResponse:
     try:
-        return await use_case.execute(category_data=category_data)
+        return await use_case.execute(
+            category_data=category_data,
+            current_user=user
+        )
+    except NotEnoughRightsException as exc:
+        raise PermissionDeniedException(exc)
     except CategoryWithSlugAlreadyExistException as exc:
         raise AlreadyExistWithFieldException(exc)
 
@@ -74,8 +81,12 @@ async def update_category(
 ) -> CategoryResponse:
     try:
         return await use_case.execute(
-            category_id=category_id, category_data=category_data
+            category_id=category_id,
+            category_data=category_data,
+            current_user=user
         )
+    except NotEnoughRightsException as exc:
+        raise PermissionDeniedException(exc)
     except CategoryNotFoundException as exc:
         raise NotFoundByFieldException(exc)
     except CategoryWithSlugAlreadyExistException as exc:
@@ -90,6 +101,11 @@ async def delete_category(
     use_case: DeleteCategoryUseCase = Depends()
 ) -> None:
     try:
-        return await use_case.execute(category_id=category_id)
+        return await use_case.execute(
+            category_id=category_id,
+            current_user=user
+        )
+    except NotEnoughRightsException as exc:
+        raise PermissionDeniedException(exc)
     except CategoryNotFoundException as exc:
         raise NotFoundByFieldException(exc)

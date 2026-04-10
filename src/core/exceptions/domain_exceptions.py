@@ -165,3 +165,13 @@ class DomainPermissionDeniedException(BaseDomainException):
 
         super().__init__(detail=self._text_template,
                          status_code=status.HTTP_403_FORBIDDEN)
+
+
+class NotEnoughRightsException(BaseDomainException):
+    _text_template = "{username} don't have enough rights for this action"
+
+    def __init__(self, username: str) -> None:
+        self._text_template = self._text_template.format(username=username)
+
+        super().__init__(detail=self._text_template,
+                         status_code=status.HTTP_403_FORBIDDEN)

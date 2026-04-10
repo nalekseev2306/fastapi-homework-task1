@@ -7,11 +7,13 @@ from domain.location.use_cases import *
 from core.exceptions.domain_exceptions import (
     LocationWithNameAlreadyExistException,
     LocationNotFoundByNameException,
-    LocationNotFoundException
+    LocationNotFoundException,
+    NotEnoughRightsException
 )
 from core.exceptions.api_exceptions import (
     NotFoundByFieldException,
-    AlreadyExistWithFieldException
+    AlreadyExistWithFieldException,
+    PermissionDeniedException
 )
 from services.auth import AuthService
 
@@ -59,7 +61,12 @@ async def create_location(
     use_case: CreateLocationUseCase = Depends()
 ) -> LocationResponse:
     try:
-        return await use_case.execute(location_data=location_data)
+        return await use_case.execute(
+            location_data=location_data,
+            current_user=user
+        )
+    except NotEnoughRightsException as exc:
+        raise PermissionDeniedException(exc)
     except LocationWithNameAlreadyExistException as exc:
         raise AlreadyExistWithFieldException(exc)
 
@@ -72,6 +79,11 @@ async def delete_location(
     use_case: DeleteLocationUseCase = Depends()
 ) -> None:
     try:
-        return await use_case.execute(location_id=location_id)
+        return await use_case.execute(
+            location_id=location_id,
+            current_user=user
+        )
+    except NotEnoughRightsException as exc:
+        raise PermissionDeniedException(exc)
     except LocationNotFoundException as exc:
         raise NotFoundByFieldException(exc)

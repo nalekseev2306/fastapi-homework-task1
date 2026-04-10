@@ -3,6 +3,7 @@ from infrastructure.sqlite.repositories import (PostRepository,
     CategoryRepository, LocationRepository
 )
 from schemas.post import PostResponse, PostUpdate
+from schemas.user import UserResponse
 from core.exceptions.database_exceptions import NotFoundException
 from core.exceptions.domain_exceptions import (
     PostNotFoundException,
@@ -19,7 +20,7 @@ class UpdatePostUseCase:
         self,
         post_id: int,
         post_data: PostUpdate,
-        current_user_id: int
+        current_user: UserResponse
     ) -> PostResponse:
         with self._database.session() as session:
             repo = PostRepository(session)
@@ -31,7 +32,7 @@ class UpdatePostUseCase:
             except NotFoundException:
                 raise PostNotFoundException(id=post_id)
             
-            if existing_post.id != current_user_id:
+            if not current_user.is_superuser and existing_post.user_id != current_user.id:
                 raise DomainPermissionDeniedException(method='update', model='posts')
 
             if post_data.category_id and post_data.category_id != existing_post.category_id:

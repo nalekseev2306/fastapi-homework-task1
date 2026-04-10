@@ -64,7 +64,7 @@ async def update_comment(
         return await use_case.execute(
             comment_id=comment_id,
             comment_data=comment_data,
-            current_user_id=user.id
+            current_user=user
         )
     except DomainPermissionDeniedException as exc:
         raise PermissionDeniedException(exc)
@@ -82,7 +82,7 @@ async def delete_comment(
     try:
         return await use_case.execute(
             comment_id=comment_id,
-            current_user_id=user.id
+            current_user=user
         )
     except DomainPermissionDeniedException as exc:
         raise PermissionDeniedException(exc)

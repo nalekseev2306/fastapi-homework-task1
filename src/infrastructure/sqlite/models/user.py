@@ -21,6 +21,11 @@ class User(BaseModel):
         index=True,
         nullable=False
     )
+    is_superuser: Mapped[bool] = mapped_column(
+        nullable=False,
+        default=False,
+        server_default='0' # для sqlite
+    )
     password: Mapped[str] = mapped_column(nullable=False)
     first_name: Mapped[str] = mapped_column(nullable=False)
     last_name: Mapped[str] = mapped_column(nullable=False)

@@ -68,8 +68,23 @@ class UserValidatorsMixin:
 
 
 class UserCreate(UserValidatorsMixin, BaseModel):
+    @field_validator("is_superuser", mode="before")
+    @staticmethod
+    def validate_is_superuser(value: Optional[bool]) -> Optional[bool]:
+        if value is None:
+            return value
+        
+        if not isinstance(value, bool):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="is_superuser must be a boolean value (true/false)"
+            )
+        
+        return value
+
     username: str
     email: EmailStr
+    is_superuser: Optional[bool] = None
     password: str
     first_name: str
     last_name: str
@@ -79,6 +94,7 @@ class UserResponse(BaseModel):
     id: int
     username: str
     email: str
+    is_superuser: bool
     first_name: str
     last_name: str
     

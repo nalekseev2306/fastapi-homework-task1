@@ -1,17 +1,28 @@
 from infrastructure.sqlite.database import database
 from infrastructure.sqlite.repositories import LocationRepository
 from schemas.location import LocationResponse, LocationCreate
+from schemas.user import UserResponse
 from core.exceptions.database_exceptions import AlreadyExistsException
-from core.exceptions.domain_exceptions import LocationWithNameAlreadyExistException
+from core.exceptions.domain_exceptions import (
+    LocationWithNameAlreadyExistException,
+    NotEnoughRightsException
+)
 
 
 class CreateLocationUseCase:
     def __init__(self):
         self._database = database
 
-    async def execute(self, location_data: LocationCreate) -> LocationResponse:
+    async def execute(
+        self,
+        location_data: LocationCreate,
+        current_user: UserResponse
+    ) -> LocationResponse:
         with self._database.session() as session:
             repo = LocationRepository(session)
+
+            if not current_user.is_superuser:
+                raise NotEnoughRightsException(current_user.username)
 
             try:
                 new_location = repo.create(location_data)

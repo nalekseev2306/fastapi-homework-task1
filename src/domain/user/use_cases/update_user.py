@@ -18,7 +18,7 @@ class UpdateUserUseCase:
         self,
         user_id: int,
         user_data: UserUpdate,
-        current_user_id: int
+        current_user: UserResponse
     ) -> UserResponse:
         with self._database.session() as session:
             repo = UserRepository(session)
@@ -28,7 +28,7 @@ class UpdateUserUseCase:
             except NotFoundException:
                 raise UserNotFoundException(user_id)
 
-            if user_id != current_user_id:
+            if not current_user.is_superuser and user_id != current_user.id:
                 raise DomainPermissionDeniedException(method='update', model='users')
 
             if user_data.username:
