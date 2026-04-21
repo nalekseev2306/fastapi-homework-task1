@@ -1,6 +1,7 @@
 from typing import List
 from fastapi import APIRouter, status, Depends
 
+from core.logging import get_logger
 from schemas.category import CategoryResponse, CategoryCreate, CategoryUpdate
 from schemas.user import UserResponse
 from domain.category.use_cases import *
@@ -19,6 +20,7 @@ from services.auth import AuthService
 
 
 router = APIRouter()
+logger = get_logger(__name__)
 
 
 @router.get('/categories/', response_model=List[CategoryResponse],
@@ -66,8 +68,10 @@ async def create_category(
             current_user=user
         )
     except NotEnoughRightsException as exc:
+        logger.error(f'{exc.get_status_code()} - {exc.get_detail()}')
         raise PermissionDeniedException(exc)
     except CategoryWithSlugAlreadyExistException as exc:
+        logger.error(f'{exc.get_status_code()} - {user.username} failed to create category: {exc.get_detail()}')
         raise AlreadyExistWithFieldException(exc)
 
 
@@ -86,10 +90,13 @@ async def update_category(
             current_user=user
         )
     except NotEnoughRightsException as exc:
+        logger.error(f'{exc.get_status_code()} - {exc.get_detail()}')
         raise PermissionDeniedException(exc)
     except CategoryNotFoundException as exc:
+        logger.error(f'{exc.get_status_code()} - {user.username} failed to update category: {exc.get_detail()}')
         raise NotFoundByFieldException(exc)
     except CategoryWithSlugAlreadyExistException as exc:
+        logger.error(f'{exc.get_status_code()} - {user.username} failed to update category: {exc.get_detail()}')
         raise AlreadyExistWithFieldException(exc)
 
 
@@ -106,6 +113,8 @@ async def delete_category(
             current_user=user
         )
     except NotEnoughRightsException as exc:
+        logger.error(f'{exc.get_status_code()} - {exc.get_detail()}')
         raise PermissionDeniedException(exc)
     except CategoryNotFoundException as exc:
+        logger.error(f'{exc.get_status_code()} - {user.username} failed to delete category: {exc.get_detail()}')
         raise NotFoundByFieldException(exc)

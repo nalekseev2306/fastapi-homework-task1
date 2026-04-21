@@ -1,6 +1,7 @@
 from typing import List
 from fastapi import APIRouter, status, Depends
 
+from core.logging import get_logger
 from schemas.location import LocationResponse, LocationCreate
 from schemas.user import UserResponse
 from domain.location.use_cases import *
@@ -19,6 +20,7 @@ from services.auth import AuthService
 
 
 router = APIRouter()
+logger = get_logger(__name__)
 
 
 @router.get('/locations/', response_model=List[LocationResponse],
@@ -66,8 +68,10 @@ async def create_location(
             current_user=user
         )
     except NotEnoughRightsException as exc:
+        logger.error(f'{exc.get_status_code()} - {exc.get_detail()}')
         raise PermissionDeniedException(exc)
     except LocationWithNameAlreadyExistException as exc:
+        logger.error(f'{exc.get_status_code()} - {user.username} failed to create location: {exc.get_detail()}')
         raise AlreadyExistWithFieldException(exc)
 
 
@@ -84,6 +88,8 @@ async def delete_location(
             current_user=user
         )
     except NotEnoughRightsException as exc:
+        logger.error(f'{exc.get_status_code()} - {exc.get_detail()}')
         raise PermissionDeniedException(exc)
     except LocationNotFoundException as exc:
+        logger.error(f'{exc.get_status_code()} - {user.username} failed to delete location: {exc.get_detail()}')
         raise NotFoundByFieldException(exc)

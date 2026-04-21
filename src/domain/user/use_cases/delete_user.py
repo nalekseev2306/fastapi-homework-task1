@@ -25,6 +25,6 @@ class DeleteUserUseCase:
                 raise UserNotFoundException(id=user_id)
             
             if not current_user.is_superuser and user_id != current_user.id:
-                raise DomainPermissionDeniedException(method='update', model='users')
+                raise DomainPermissionDeniedException(method='delete', model='users')
 
             repo.delete(user_id)

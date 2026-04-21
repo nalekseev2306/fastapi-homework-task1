@@ -1,6 +1,7 @@
 from typing import List
 from fastapi import APIRouter, status, Depends
 
+from core.logging import get_logger
 from schemas.user import UserResponse, UserCreate, UserUpdate
 from domain.user.use_cases import *
 from core.exceptions.domain_exceptions import (
@@ -20,6 +21,7 @@ from services.auth import AuthService
 
 
 router = APIRouter()
+logger = get_logger(__name__)
 
 
 @router.get('/users/', response_model=List[UserResponse],
@@ -76,6 +78,7 @@ async def create_user(
         return await use_case.execute(user_data=user_data)
     except (UserWithUsernameAlreadyExistException,
             UserWithEmailAlreadyExistException) as exc:
+        logger.error(f'{exc.get_status_code()} - Failed to create user: {exc.get_detail()}')
         raise AlreadyExistWithFieldException(exc)
 
 
@@ -94,11 +97,14 @@ async def update_user(
             current_user=user
         )
     except DomainPermissionDeniedException as exc:
+        logger.error(f'{exc.get_status_code()} - {user.username}: {exc.get_detail()}')
         raise PermissionDeniedException(exc)
     except UserNotFoundException as exc:
+        logger.error(f'{exc.get_status_code()} - {user.username} failed to update user: {exc.get_detail()}')
         raise NotFoundByFieldException(exc)
     except (UserWithUsernameAlreadyExistException,
             UserWithEmailAlreadyExistException) as exc:
+        logger.error(f'{exc.get_status_code()} - {user.username} failed to update user: {exc.get_detail()}')
         raise AlreadyExistWithFieldException(exc)
 
 
@@ -115,6 +121,8 @@ async def delete_user(
             current_user=user
         )
     except DomainPermissionDeniedException as exc:
+        logger.error(f'{exc.get_status_code()} - {user.username}: {exc.get_detail()}')
         raise PermissionDeniedException(exc)
     except UserNotFoundException as exc:
+        logger.error(f'{exc.get_status_code()} - {user.username} failed to delete user: {exc.get_detail()}')
         raise NotFoundByFieldException(exc)

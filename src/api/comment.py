@@ -1,6 +1,7 @@
 from typing import List
 from fastapi import APIRouter, status, Depends
 
+from core.logging import get_logger
 from schemas.comment import CommentResponse, CommentCreate, CommentUpdate
 from schemas.user import UserResponse
 from domain.comment.use_cases import *
@@ -17,6 +18,7 @@ from services.auth import AuthService
 
 
 router = APIRouter()
+logger = get_logger(__name__)
 
 
 @router.get('/comments/', response_model=List[CommentResponse],
@@ -49,6 +51,7 @@ async def create_comment(
     try:
         return await use_case.execute(comment_data=comment_data, author_id=user.id)
     except PostNotFoundException as exc:
+        logger.error(f'{exc.get_status_code()} - {user.username} failed to create comment: {exc.get_detail()}')
         raise NotFoundByFieldException(exc)
 
 
@@ -67,8 +70,10 @@ async def update_comment(
             current_user=user
         )
     except DomainPermissionDeniedException as exc:
+        logger.error(f'{exc.get_status_code()} - {user.username}: {exc.get_detail()}')
         raise PermissionDeniedException(exc)
     except CommentNotFoundException as exc:
+        logger.error(f'{exc.get_status_code()} - {user.username} failed to update comment: {exc.get_detail()}')
         raise NotFoundByFieldException(exc)
 
 
@@ -85,6 +90,8 @@ async def delete_comment(
             current_user=user
         )
     except DomainPermissionDeniedException as exc:
+        logger.error(f'{exc.get_status_code()} - {user.username}: {exc.get_detail()}')
         raise PermissionDeniedException(exc)
     except CommentNotFoundException as exc:
+        logger.error(f'{exc.get_status_code()} - {user.username} failed to delete comment: {exc.get_detail()}')
         raise NotFoundByFieldException(exc)

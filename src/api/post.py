@@ -1,6 +1,7 @@
 from typing import List
 from fastapi import APIRouter, status, Depends
 
+from core.logging import get_logger
 from schemas.post import PostResponse, PostCreate, PostUpdate
 from schemas.user import UserResponse
 from domain.post.use_cases import *
@@ -18,6 +19,7 @@ from services.auth import AuthService
 
 
 router = APIRouter()
+logger = get_logger(__name__)
 
 
 @router.get('/posts/', response_model=List[PostResponse],
@@ -51,6 +53,7 @@ async def create_post(
         return await use_case.execute(post_data=post_data, author_id=user.id)
     except (CategoryNotFoundException,
             LocationNotFoundException) as exc:
+        logger.error(f'{exc.get_status_code()} - {user.username} failed to create post: {exc.get_detail()}')
         raise NotFoundByFieldException(exc)
 
 
@@ -69,9 +72,11 @@ async def update_post(
             current_user=user
         )
     except DomainPermissionDeniedException as exc:
+        logger.error(f'{exc.get_status_code()} - {user.username}: {exc.get_detail()}')
         raise PermissionDeniedException(exc)
     except (CategoryNotFoundException,
             LocationNotFoundException) as exc:
+        logger.error(f'{exc.get_status_code()} - {user.username} failed to update post: {exc.get_detail()}')
         raise NotFoundByFieldException(exc)
 
 
@@ -88,6 +93,8 @@ async def delete_post(
             current_user=user
         )
     except DomainPermissionDeniedException as exc:
+        logger.error(f'{exc.get_status_code()} - {user.username}: {exc.get_detail()}')
         raise PermissionDeniedException(exc)
     except PostNotFoundException as exc:
+        logger.error(f'{exc.get_status_code()} - {user.username} failed to delete post: {exc.get_detail()}')
         raise NotFoundByFieldException(exc)
