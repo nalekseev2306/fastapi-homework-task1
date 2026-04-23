@@ -2,13 +2,15 @@ import asyncio
 import uvicorn
 
 from app import create_app
+from core.config import settings
 
 # создаём приложение
 app = create_app()
 
+
 # описывает как запустить приложение
 async def run() -> None:
-    config = uvicorn.Config("main:app", host="localhost", port=8000, reload=False)
+    config = uvicorn.Config("main:app", host="localhost", port=settings.PORT, reload=False)
     server = uvicorn.Server(config=config) # создаём сервер по конфигу
 
     # предоставляем задачи через кортеж

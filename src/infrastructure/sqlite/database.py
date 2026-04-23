@@ -4,11 +4,12 @@ from contextlib import contextmanager
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
+from core.config import settings
 
 
 class Database:
     def __init__(self):
-        self._db_url = "sqlite:///D:/Progi/Backend/fastapi/test.db"
+        self._db_url = settings.SQLITE_URL
         self._engine = create_engine(self._db_url)
 
     # аналог with для работы с сессиями

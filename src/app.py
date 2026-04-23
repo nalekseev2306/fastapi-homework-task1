@@ -5,15 +5,16 @@ from api import (
     user_router, post_router, category_router,
     comment_router, location_router, auth_router
 )
+from core.config import settings
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(root_path="/api/v1")
+    app = FastAPI(root_path=settings.ROOT_PATH)
 
     # настройки (* - разрешает всё)
     app.add_middleware(
         CORSMiddleware, # type: ignore
-        allow_origins=["*"], # с каких айпи разрешен запрос
+        allow_origins=settings.origins_list, # с каких айпи разрешен запрос
         allow_credentials=True, # разрешение на использование токенов
         allow_methods=["*"], # какие методы разрешены
         allow_headers=["*"], # фильтр хэдеров

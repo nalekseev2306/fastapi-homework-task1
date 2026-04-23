@@ -1,5 +1,6 @@
 venv/
 __pycache__/
+data/
 
 *.db
 *.db3
@@ -8,3 +9,5 @@ __pycache__/
 
 alembic/versions/*.pyc
 alembic.log
+
+.env
