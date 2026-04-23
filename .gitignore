@@ -11,3 +11,4 @@ alembic/versions/*.pyc
 alembic.log
 
 .env
+.env.docker
