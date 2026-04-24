@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta, timezone
 from jose import jwt
 
-from services.auth import SECRET_AUTH_KEY, AUTH_ALGORITHM
 from core.config import settings
 
 

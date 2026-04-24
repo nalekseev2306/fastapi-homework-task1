@@ -3,15 +3,15 @@ from typing import List
 
 
 class Settings(BaseSettings):
-    ORIGINS: str = ''
-    PORT: int = 8000
-    ROOT_PATH: str = '/api/v1'
+    ORIGINS: str
+    PORT: int
+    ROOT_PATH: str
 
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 5
-    AUTH_ALGORITHM: str = 'HS256'
-    SECRET_AUTH_KEY: str = 'aF75A92Cd9s10KGL4nLdt1r85XRtZ7APNO6NheGeKdRBhhc9oObQywxmqPF'
+    ACCESS_TOKEN_EXPIRE_MINUTES: int
+    AUTH_ALGORITHM: str
+    SECRET_AUTH_KEY: str
 
-    SQLITE_URL: str = 'sqlite:///../data/test.db'
+    SQLITE_URL: str
 
     @property
     def origins_list(self) -> List[str]:

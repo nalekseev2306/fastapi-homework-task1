@@ -13,6 +13,7 @@ def create_app() -> FastAPI:
 
     # настройки (* - разрешает всё)
     app.add_middleware(
+        # для логирования можно добавить свой мидлваре
         CORSMiddleware, # type: ignore
         allow_origins=settings.origins_list, # с каких айпи разрешен запрос
         allow_credentials=True, # разрешение на использование токенов

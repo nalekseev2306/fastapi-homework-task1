@@ -1,5 +1,4 @@
 from typing import Annotated
-from pydantic import SecretStr
 from fastapi import Depends
 from jose import JWTError, jwt
 
@@ -9,10 +8,9 @@ from schemas.user import UserResponse
 from resources.auth import oauth2_scheme
 from infrastructure.sqlite.database import database as sqlite_database, Database
 from infrastructure.sqlite.repositories import UserRepository
+from core.config import settings
 
 AUTH_EXCEPTION_MESSAGE = "Authorization data cannot be verified"
-SECRET_AUTH_KEY = SecretStr("aF75A92Cd9s10KGL4nLdt1r85XRtZ7APNO6NheGeKdRBhhc9oObQywxmqPF")
-AUTH_ALGORITHM = "HS256"
 
 
 class AuthService:
@@ -23,8 +21,8 @@ class AuthService:
         try:
             payload = jwt.decode(
                 token=token,
-                key=SECRET_AUTH_KEY.get_secret_value(),
-                algorithms=[AUTH_ALGORITHM],
+                key=settings.SECRET_AUTH_KEY,
+                algorithms=[settings.AUTH_ALGORITHM],
             )
             username: str = payload.get('sub')
             if username is None:
