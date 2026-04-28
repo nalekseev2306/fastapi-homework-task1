@@ -175,3 +175,21 @@ class NotEnoughRightsException(BaseDomainException):
 
         super().__init__(detail=self._text_template,
                          status_code=status.HTTP_403_FORBIDDEN)
+
+
+class UploadFileIsNotImageException(BaseDomainException):
+    _text_template = "Unknow image extension"
+
+    def __init__(self) -> None:
+        super().__init__(detail=self._text_template,
+                         status_code=status.HTTP_400_BAD_REQUEST)
+
+
+class PostHasNoImageException(BaseDomainException):
+    _text_template = "Post {post_id} has no image"
+
+    def __init__(self, id: int) -> None:
+        self._text_template = self._text_template.format(post_id=id)
+
+        super().__init__(detail=self._text_template,
+                         status_code=status.HTTP_404_NOT_FOUND)

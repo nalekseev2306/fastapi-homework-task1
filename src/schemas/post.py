@@ -60,3 +60,7 @@ class PostUpdate(BaseModel, TitleValidatorMixin):
     category_id: Optional[int] = None
     # image: Optional[str] = None
     is_published: Optional[bool] = None
+
+
+class PostImageResponse(BaseModel):
+    image_path: str

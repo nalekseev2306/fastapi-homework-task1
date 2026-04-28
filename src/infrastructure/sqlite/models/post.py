@@ -18,7 +18,7 @@ class Post(BaseModel, PublishStatusMixin):
     title: Mapped[str] = mapped_column(nullable=False)
     text: Mapped[str] = mapped_column(nullable=False)
     pub_date: Mapped[datetime] = mapped_column(nullable=False)
-    # image: Mapped[str]
+    image: Mapped[str | None] = mapped_column(nullable=True)
 
     comments: Mapped[List['Comment']] = relationship(
         'Comment',

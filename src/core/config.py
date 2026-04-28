@@ -20,7 +20,7 @@ class Settings(BaseSettings):
         return [origin.strip() for origin in self.ORIGINS.split(",")]
 
     class Config:
-        env_file = '.env'
+        env_file = '../.env'
         env_file_encoding = "utf-8"
 
 

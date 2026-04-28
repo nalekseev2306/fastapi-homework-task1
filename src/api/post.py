@@ -1,19 +1,29 @@
 from typing import List
-from fastapi import APIRouter, status, Depends
+from fastapi import APIRouter, status, Depends, UploadFile, File
+from fastapi.responses import FileResponse
 
 from core.logging import get_logger
-from schemas.post import PostResponse, PostCreate, PostUpdate
+from schemas.post import (
+    PostResponse,
+    PostCreate,
+    PostUpdate,
+    PostImageResponse
+)
 from schemas.user import UserResponse
 from domain.post.use_cases import *
 from core.exceptions.domain_exceptions import (
     PostNotFoundException,
     CategoryNotFoundException,
     LocationNotFoundException,
-    DomainPermissionDeniedException
+    DomainPermissionDeniedException,
+    UploadFileIsNotImageException,
+    PostHasNoImageException,
+    NotEnoughRightsException
 )
 from core.exceptions.api_exceptions import (
     NotFoundByFieldException,
-    PermissionDeniedException
+    PermissionDeniedException,
+    ImageException
 )
 from services.auth import AuthService
 
@@ -40,6 +50,39 @@ async def get_post(
         return await use_case.execute(post_id=post_id)
     except PostNotFoundException as exc:
         raise NotFoundByFieldException(exc)
+
+
+@router.get('/posts/{post_id}/image', status_code=status.HTTP_200_OK,
+            response_class=FileResponse)
+async def get_post_image(
+    post_id: int,
+    use_case: GetImageUseCase = Depends()
+):
+    try:
+        return await use_case.execute(post_id=post_id)
+    except PostNotFoundException as exc:
+        raise NotFoundByFieldException(exc)
+    except PostHasNoImageException as exc:
+        raise ImageException(exc)
+
+
+@router.post('/posts/{post_id}/image', status_code=status.HTTP_201_CREATED,
+             response_model=PostImageResponse)
+async def add_post_image(
+    post_id: int,
+    image: UploadFile = File(...),
+    user: dict = Depends(AuthService.get_current_user),
+    use_case: AddImageUseCase = Depends()
+):
+    try:
+        return await use_case.execute(post_id=post_id, image=image, current_user=user)
+    except PostNotFoundException as exc:
+        raise NotFoundByFieldException(exc)
+    except (PostHasNoImageException,
+            UploadFileIsNotImageException) as exc:
+        raise ImageException(exc)
+    except NotEnoughRightsException as exc:
+        raise PermissionDeniedException(exc)
 
 
 @router.post('/posts/', response_model=PostResponse,
