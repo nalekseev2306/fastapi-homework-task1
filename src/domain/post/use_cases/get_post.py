@@ -1,5 +1,5 @@
-from infrastructure.sqlite.database import database
-from infrastructure.sqlite.repositories import PostRepository
+from infrastructure.postgres.database import database
+from infrastructure.postgres.repositories import PostRepository
 from schemas.post import PostResponse
 from core.exceptions.database_exceptions import NotFoundException
 from core.exceptions.domain_exceptions import PostNotFoundException
@@ -10,11 +10,11 @@ class GetPostUseCase:
         self._database = database
 
     async def execute(self, post_id: int) -> PostResponse:
-        with self._database.session() as session:
+        async with self._database.session() as session:
             repo = PostRepository(session)
 
             try:
-                post = repo.get(post_id)
+                post = await repo.get(post_id)
             except NotFoundException:
                 raise PostNotFoundException(id=post_id)
 

@@ -1,5 +1,5 @@
-from infrastructure.sqlite.database import database
-from infrastructure.sqlite.repositories import UserRepository
+from infrastructure.postgres.database import database
+from infrastructure.postgres.repositories import UserRepository
 from schemas.user import UserResponse, UserUpdate
 from core.exceptions.database_exceptions import NotFoundException
 from core.exceptions.domain_exceptions import (
@@ -20,11 +20,11 @@ class UpdateUserUseCase:
         user_data: UserUpdate,
         current_user: UserResponse
     ) -> UserResponse:
-        with self._database.session() as session:
+        async with self._database.session() as session:
             repo = UserRepository(session)
 
             try:
-                repo.get(user_id)
+                await repo.get(user_id)
             except NotFoundException:
                 raise UserNotFoundException(user_id)
 
@@ -33,7 +33,7 @@ class UpdateUserUseCase:
 
             if user_data.username:
                 try:
-                    user_with_username = repo.get_by_username(user_data.username)
+                    user_with_username = await repo.get_by_username(user_data.username)
                     if user_with_username and user_with_username.id != user_id:
                         raise UserWithUsernameAlreadyExistException(user_data.username)
                 except NotFoundException:
@@ -41,11 +41,11 @@ class UpdateUserUseCase:
 
             if user_data.email:
                 try:
-                    user_with_email = repo.get_by_email(user_data.email)
+                    user_with_email = await repo.get_by_email(user_data.email)
                     if user_with_email and user_with_email.id != user_id:
                         raise UserWithEmailAlreadyExistException(user_data.email)
                 except NotFoundException:
                     pass
 
-            updated_user = repo.update(user_id, user_data)
+            updated_user = await repo.update(user_id, user_data)
             return UserResponse.model_validate(updated_user)

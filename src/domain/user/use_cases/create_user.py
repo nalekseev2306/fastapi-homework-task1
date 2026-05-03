@@ -1,5 +1,5 @@
-from infrastructure.sqlite.database import database
-from infrastructure.sqlite.repositories import UserRepository
+from infrastructure.postgres.database import database
+from infrastructure.postgres.repositories import UserRepository
 from schemas.user import UserResponse, UserCreate
 from core.exceptions.database_exceptions import (
     NotFoundException,
@@ -19,20 +19,20 @@ class CreateUserUseCase:
     async def execute(self, user_data: UserCreate) -> UserResponse:
         user_data.password = get_password_hash(password=user_data.password)
 
-        with self._database.session() as session:
+        async with self._database.session() as session:
             repo = UserRepository(session)
 
             try:
-                new_user = repo.create(user_data)
+                new_user = await repo.create(user_data)
             except AlreadyExistsException:
                 try:
-                    repo.get_by_username(user_data.username)
+                    await repo.get_by_username(user_data.username)
                     raise UserWithUsernameAlreadyExistException(user_data.username)
                 except NotFoundException:
                     pass
                 
                 try:
-                    repo.get_by_email(user_data.email)
+                    await repo.get_by_email(user_data.email)
                     raise UserWithEmailAlreadyExistException(user_data.email)
                 except NotFoundException:
                     pass

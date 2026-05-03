@@ -1,9 +1,9 @@
 from typing import Type, List, Optional
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, insert
 from sqlalchemy.exc import IntegrityError
 
-from infrastructure.sqlite.models import Location
+from infrastructure.postgres.models import Location
 from schemas.location import LocationCreate
 from core.exceptions.database_exceptions import (
     NotFoundException,
@@ -11,38 +11,39 @@ from core.exceptions.database_exceptions import (
 )
 
 class LocationRepository:
-    def __init__(self, session: Session):
+    def __init__(self, session: AsyncSession):
         self._model: Type[Location] = Location
         self._session = session
 
-    def get(self, location_id: int) -> Optional[Location]:
+    async def get(self, location_id: int) -> Optional[Location]:
         query = (
             select(self._model)
             .where(self._model.id == location_id)     
         )
 
-        location = self._session.scalar(query)
+        location = await self._session.scalar(query)
         if not location:
             raise NotFoundException()
 
         return location
 
-    def get_by_name(self, name: str) -> Optional[Location]:
+    async def get_by_name(self, name: str) -> Optional[Location]:
         query = (
             select(self._model)
             .where(self._model.name == name)     
         )
 
-        location = self._session.scalar(query)
+        location = await self._session.scalar(query)
         if not location:
             raise NotFoundException()
 
         return location
 
-    def get_all(self) -> List[Location]:
-        return self._session.query(self._model).all()
+    async def get_all(self) -> List[Location]:
+        result = await self._session.execute(select(self._model))
+        return result.scalars().all()
 
-    def create(self, location_data: LocationCreate) -> Location:
+    async def create(self, location_data: LocationCreate) -> Location:
         query = (
             insert(self._model)
             .values(location_data.model_dump())
@@ -50,15 +51,15 @@ class LocationRepository:
         )
         
         try:
-            location = self._session.scalar(query)
+            location = await self._session.scalar(query)
         except IntegrityError:
             raise AlreadyExistsException()
         
         return location
 
-    def delete(self, location_id: int) -> bool:
-        location = self.get(location_id)
+    async def delete(self, location_id: int) -> bool:
+        location = await self.get(location_id)
         
-        self._session.delete(location)
-        self._session.commit()
+        await self._session.delete(location)
+        await self._session.commit()
         return True

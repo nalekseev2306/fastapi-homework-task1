@@ -5,12 +5,11 @@ COPY ./src /app/src
 COPY ./alembic /app/alembic
 COPY alembic.ini /app/
 COPY requirements.txt /app/
-# COPY test.db /app/
-# COPY ./images /app/images
+COPY ./media /app/media
 
 RUN mkdir -p /app/data
 
-ENV PYTHONPATH /app/src
+ENV PYTHONPATH /app
 WORKDIR /app
 RUN pip install --upgrade pip
 RUN pip install -r ./requirements.txt --no-cache-dir

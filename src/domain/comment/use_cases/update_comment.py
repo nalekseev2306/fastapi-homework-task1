@@ -1,5 +1,5 @@
-from infrastructure.sqlite.database import database
-from infrastructure.sqlite.repositories import CommentRepository
+from infrastructure.postgres.database import database
+from infrastructure.postgres.repositories import CommentRepository
 from schemas.comment import CommentResponse, CommentUpdate
 from schemas.user import UserResponse
 from core.exceptions.database_exceptions import NotFoundException
@@ -19,16 +19,16 @@ class UpdateCommentUseCase:
         comment_data: CommentUpdate,
         current_user: UserResponse
     ) -> CommentResponse:
-        with self._database.session() as session:
+        async with self._database.session() as session:
             repo = CommentRepository(session)
 
             try:
-                comment = repo.get(comment_id)
+                comment = await repo.get(comment_id)
             except NotFoundException:
                 raise CommentNotFoundException(id=comment_id)
             
             if not current_user.is_superuser and comment.user_id != current_user.id:
                 raise DomainPermissionDeniedException(method='update', model='comments')
 
-            updated_comment = repo.update(comment_id, comment_data)
+            updated_comment = await repo.update(comment_id, comment_data)
             return CommentResponse.model_validate(updated_comment)

@@ -1,5 +1,5 @@
-from infrastructure.sqlite.database import database
-from infrastructure.sqlite.repositories import (
+from infrastructure.postgres.database import database
+from infrastructure.postgres.repositories import (
     CommentRepository,
     PostRepository
 )
@@ -13,14 +13,14 @@ class CreateCommentUseCase:
         self._database = database
 
     async def execute(self, comment_data: CommentCreate, author_id: int) -> CommentResponse:
-        with self._database.session() as session:
+        async with self._database.session() as session:
             repo = CommentRepository(session)
             post_repo = PostRepository(session)
 
             try:
-                post_repo.get(comment_data.post_id)
+                await post_repo.get(comment_data.post_id)
             except NotFoundException:
                 raise PostNotFoundException(id=comment_data.post_id)
 
-            new_comment = repo.create(comment_data, author_id)
+            new_comment = await repo.create(comment_data, author_id)
             return CommentResponse.model_validate(new_comment)

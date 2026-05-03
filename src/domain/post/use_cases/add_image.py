@@ -3,8 +3,8 @@ import shutil
 from uuid import uuid4
 from fastapi import UploadFile
 
-from infrastructure.sqlite.database import database
-from infrastructure.sqlite.repositories import PostRepository
+from infrastructure.postgres.database import database
+from infrastructure.postgres.repositories import PostRepository
 from schemas.post import PostImageResponse
 from schemas.user import UserResponse
 from core.exceptions.domain_exceptions import (
@@ -34,11 +34,11 @@ class AddImageUseCase:
         if file_extension not in ALLOWED_EXT:
             raise UploadFileIsNotImageException()
 
-        with self._database.session() as session:
+        async with self._database.session() as session:
             repo = PostRepository(session)
 
             try:
-                post = repo.get(post_id)
+                post = await repo.get(post_id)
             except NotFoundException:
                 raise PostNotFoundException(id=post_id)
 
@@ -52,6 +52,6 @@ class AddImageUseCase:
                 shutil.copyfileobj(image.file, buffer)
 
             post.image = image_name
-            session.commit()
+            await session.commit()
 
             return PostImageResponse(image_path=image_name)

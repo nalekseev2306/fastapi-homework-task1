@@ -1,5 +1,5 @@
-from infrastructure.sqlite.database import database
-from infrastructure.sqlite.repositories import (PostRepository, 
+from infrastructure.postgres.database import database
+from infrastructure.postgres.repositories import (PostRepository, 
     CategoryRepository, LocationRepository
 )
 from schemas.post import PostResponse, PostUpdate
@@ -22,13 +22,13 @@ class UpdatePostUseCase:
         post_data: PostUpdate,
         current_user: UserResponse
     ) -> PostResponse:
-        with self._database.session() as session:
+        async with self._database.session() as session:
             repo = PostRepository(session)
             category_repo = CategoryRepository(session)
             location_repo = LocationRepository(session)
 
             try:
-                existing_post = repo.get(post_id)
+                existing_post = await repo.get(post_id)
             except NotFoundException:
                 raise PostNotFoundException(id=post_id)
             
@@ -37,15 +37,15 @@ class UpdatePostUseCase:
 
             if post_data.category_id and post_data.category_id != existing_post.category_id:
                 try:
-                    category_repo.get(post_data.category_id)
+                    await category_repo.get(post_data.category_id)
                 except NotFoundException:
                     raise CategoryNotFoundException(id=post_data.category_id)
 
             if post_data.location_id and post_data.location_id != existing_post.location_id:
                 try:
-                    location_repo.get(post_data.location_id)
+                    await location_repo.get(post_data.location_id)
                 except NotFoundException:
                     raise LocationNotFoundException(id=post_data.location_id)
 
-            updated_post = repo.update(post_id, post_data)
+            updated_post = await repo.update(post_id, post_data)
             return PostResponse.model_validate(updated_post)

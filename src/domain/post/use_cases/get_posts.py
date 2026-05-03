@@ -1,7 +1,7 @@
 from typing import List
 
-from infrastructure.sqlite.database import database
-from infrastructure.sqlite.repositories import PostRepository
+from infrastructure.postgres.database import database
+from infrastructure.postgres.repositories import PostRepository
 from schemas.post import PostResponse
 
 
@@ -10,9 +10,9 @@ class GetPostsUseCase:
         self._database = database
 
     async def execute(self) -> List[PostResponse]:
-        with self._database.session() as session:
+        async with self._database.session() as session:
             repo = PostRepository(session)
 
-            posts = repo.get_all()
+            posts = await repo.get_all()
 
             return [PostResponse.model_validate(post) for post in posts]

@@ -1,5 +1,5 @@
-from infrastructure.sqlite.database import database
-from infrastructure.sqlite.repositories import UserRepository
+from infrastructure.postgres.database import database
+from infrastructure.postgres.repositories import UserRepository
 from schemas.user import UserResponse
 from core.exceptions.database_exceptions import NotFoundException
 from core.exceptions.domain_exceptions import (
@@ -16,15 +16,15 @@ class DeleteUserUseCase:
         user_id: int,
         current_user: UserResponse
     ) -> None:
-        with self._database.session() as session:
+        async with self._database.session() as session:
             repo = UserRepository(session)
 
             try:
-                repo.get(user_id)
+                await repo.get(user_id)
             except NotFoundException:
                 raise UserNotFoundException(id=user_id)
             
             if not current_user.is_superuser and user_id != current_user.id:
                 raise DomainPermissionDeniedException(method='delete', model='users')
 
-            repo.delete(user_id)
+            await repo.delete(user_id)

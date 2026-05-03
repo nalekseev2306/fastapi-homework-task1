@@ -1,19 +1,20 @@
-from infrastructure.sqlite.database import database
-from infrastructure.sqlite.repositories import CategoryRepository
+from infrastructure.postgres.database import database
+from infrastructure.postgres.repositories import CategoryRepository
 from schemas.category import CategoryResponse
 from core.exceptions.database_exceptions import NotFoundException
 from core.exceptions.domain_exceptions import CategoryNotFoundException
+
 
 class GetCategoryUseCase:
     def __init__(self):
         self._database = database
 
     async def execute(self, category_id: int) -> CategoryResponse:
-        with self._database.session() as session:
+        async with self._database.session() as session:
             repo = CategoryRepository(session)
 
             try:
-                category = repo.get(category_id)
+                category = await repo.get(category_id)
             except NotFoundException:
                 raise CategoryNotFoundException(id=category_id)
 

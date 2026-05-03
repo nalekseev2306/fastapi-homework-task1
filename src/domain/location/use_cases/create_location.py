@@ -1,5 +1,5 @@
-from infrastructure.sqlite.database import database
-from infrastructure.sqlite.repositories import LocationRepository
+from infrastructure.postgres.database import database
+from infrastructure.postgres.repositories import LocationRepository
 from schemas.location import LocationResponse, LocationCreate
 from schemas.user import UserResponse
 from core.exceptions.database_exceptions import AlreadyExistsException
@@ -18,14 +18,14 @@ class CreateLocationUseCase:
         location_data: LocationCreate,
         current_user: UserResponse
     ) -> LocationResponse:
-        with self._database.session() as session:
+        async with self._database.session() as session:
             repo = LocationRepository(session)
 
             if not current_user.is_superuser:
                 raise NotEnoughRightsException(current_user.username)
 
             try:
-                new_location = repo.create(location_data)
+                new_location = await repo.create(location_data)
             except AlreadyExistsException:
                 raise LocationWithNameAlreadyExistException(location_data.name)
                 

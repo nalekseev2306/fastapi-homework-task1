@@ -1,5 +1,5 @@
-from infrastructure.sqlite.database import database
-from infrastructure.sqlite.repositories import UserRepository
+from infrastructure.postgres.database import database
+from infrastructure.postgres.repositories import UserRepository
 from schemas.user import UserResponse
 from core.exceptions.database_exceptions import NotFoundException
 from core.exceptions.domain_exceptions import UserNotFoundByEmailException
@@ -10,11 +10,11 @@ class GetUserByEmailUseCase:
         self._database = database
 
     async def execute(self, email: int) -> UserResponse:
-        with self._database.session() as session:
+        async with self._database.session() as session:
             repo = UserRepository(session)
 
             try:
-                user = repo.get_by_email(email)
+                user = await repo.get_by_email(email)
             except NotFoundException:
                 raise UserNotFoundByEmailException(email=email)
             

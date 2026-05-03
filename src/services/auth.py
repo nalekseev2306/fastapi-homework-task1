@@ -6,8 +6,8 @@ from core.exceptions.auth_exceptions import CredentialsException
 from core.exceptions.database_exceptions import NotFoundException
 from schemas.user import UserResponse
 from resources.auth import oauth2_scheme
-from infrastructure.sqlite.database import database as sqlite_database, Database
-from infrastructure.sqlite.repositories import UserRepository
+from infrastructure.postgres.database import database as postgres_database, Database
+from infrastructure.postgres.repositories import UserRepository
 from core.config import settings
 
 AUTH_EXCEPTION_MESSAGE = "Authorization data cannot be verified"
@@ -16,7 +16,7 @@ AUTH_EXCEPTION_MESSAGE = "Authorization data cannot be verified"
 class AuthService:
     @staticmethod
     async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
-        _database: Database = sqlite_database
+        _database: Database = postgres_database
 
         try:
             payload = jwt.decode(
@@ -30,10 +30,10 @@ class AuthService:
         except JWTError:
             raise CredentialsException(detail=AUTH_EXCEPTION_MESSAGE)
             
-        with _database.session() as session:
+        async with _database.session() as session:
             try:
                 repo = UserRepository(session)
-                user = repo.get_by_username(username=username)
+                user = await repo.get_by_username(username=username)
             except NotFoundException:
                 raise CredentialsException(detail=AUTH_EXCEPTION_MESSAGE)
 

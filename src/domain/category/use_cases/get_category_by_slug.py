@@ -1,5 +1,5 @@
-from infrastructure.sqlite.database import database
-from infrastructure.sqlite.repositories import CategoryRepository
+from infrastructure.postgres.database import database
+from infrastructure.postgres.repositories import CategoryRepository
 from schemas.category import CategoryResponse
 from core.exceptions.database_exceptions import NotFoundException
 from core.exceptions.domain_exceptions import CategoryNotFoundBySlugException
@@ -10,11 +10,11 @@ class GetCategoryBySlugUseCase:
         self._database = database
 
     async def execute(self, slug: str) -> CategoryResponse:
-        with self._database.session() as session:
+        async with self._database.session() as session:
             repo = CategoryRepository(session)
 
             try:
-                category = repo.get_by_slug(slug)
+                category = await repo.get_by_slug(slug)
             except NotFoundException:
                 raise CategoryNotFoundBySlugException(slug=slug)
 

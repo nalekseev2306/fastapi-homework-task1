@@ -1,5 +1,5 @@
-from infrastructure.sqlite.database import database
-from infrastructure.sqlite.repositories import LocationRepository
+from infrastructure.postgres.database import database
+from infrastructure.postgres.repositories import LocationRepository
 from schemas.user import UserResponse
 from core.exceptions.database_exceptions import NotFoundException
 from core.exceptions.domain_exceptions import (
@@ -17,13 +17,13 @@ class DeleteLocationUseCase:
         location_id: int,
         current_user: UserResponse
     ) -> None:
-        with self._database.session() as session:
+        async with self._database.session() as session:
             repo = LocationRepository(session)
 
             if not current_user.is_superuser:
                 raise NotEnoughRightsException(current_user.username)
 
             try:
-                repo.delete(location_id)
+                await repo.delete(location_id)
             except NotFoundException:
                 raise LocationNotFoundException(id=location_id)

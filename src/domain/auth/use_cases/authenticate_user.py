@@ -1,5 +1,5 @@
-from infrastructure.sqlite.database import database
-from infrastructure.sqlite.repositories import UserRepository
+from infrastructure.postgres.database import database
+from infrastructure.postgres.repositories import UserRepository
 from schemas.user import UserResponse
 from resources.auth import verify_password
 from core.exceptions.database_exceptions import NotFoundException
@@ -18,10 +18,10 @@ class AuthenticateUserUseCase:
         username: str,
         password: str
     ) -> UserResponse:
-        with self._database.session() as session:
+        async with self._database.session() as session:
             try:
                 repo = UserRepository(session)
-                user = repo.get_by_username(username=username)
+                user = await repo.get_by_username(username=username)
             except NotFoundException:
                 raise UserNotFoundByUsernameException(username)
             
