@@ -3,6 +3,7 @@ __pycache__/
 data/
 static/
 media/
+.ruff_cache/
 
 *.db
 *.db3

@@ -1,14 +1,12 @@
-from typing import Type, List, Optional
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy import select, insert
+from typing import List, Optional, Type
 
+from sqlalchemy import insert, select
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from core.exceptions.database_exceptions import AlreadyExistsException, NotFoundException
 from infrastructure.postgres.models import User
 from schemas.user import UserCreate, UserUpdate
-from core.exceptions.database_exceptions import (
-    NotFoundException,
-    AlreadyExistsException
-)
 
 
 class UserRepository:
@@ -17,39 +15,30 @@ class UserRepository:
         self._session = session
 
     async def get(self, user_id: int) -> Optional[User]:
-        query = (
-            select(self._model)
-            .where(self._model.id == user_id)
-        )
+        query = select(self._model).where(self._model.id == user_id)
 
         user = await self._session.scalar(query)
         if not user:
             raise NotFoundException()
-        
+
         return user
 
     async def get_by_username(self, username: str) -> Optional[User]:
-        query = (
-            select(self._model)
-            .where(self._model.username == username)
-        )
+        query = select(self._model).where(self._model.username == username)
 
         user = await self._session.scalar(query)
         if not user:
             raise NotFoundException()
-        
+
         return user
-    
+
     async def get_by_email(self, email: str) -> Optional[User]:
-        query = (
-            select(self._model)
-            .where(self._model.email == email)
-        )
+        query = select(self._model).where(self._model.email == email)
 
         user = await self._session.scalar(query)
         if not user:
             raise NotFoundException()
-        
+
         return user
 
     async def get_all(self) -> List[User]:
@@ -58,12 +47,8 @@ class UserRepository:
 
     async def create(self, user_data: UserCreate) -> User:
         data = user_data.model_dump()
-        
-        query = (
-            insert(self._model)
-            .values(data)
-            .returning(self._model)
-        )
+
+        query = insert(self._model).values(data).returning(self._model)
 
         try:
             user = await self._session.scalar(query)
@@ -79,14 +64,14 @@ class UserRepository:
         for key, value in update_data.items():
             if hasattr(user, key):
                 setattr(user, key, value)
-        
+
         await self._session.commit()
         await self._session.refresh(user)
         return user
 
     async def delete(self, user_id: int) -> bool:
         user = await self.get(user_id)
-        
+
         await self._session.delete(user)
         await self._session.commit()
         return True

@@ -1,18 +1,19 @@
 import os
 import shutil
 from uuid import uuid4
+
 from fastapi import UploadFile
 
+from core.exceptions.database_exceptions import NotFoundException
+from core.exceptions.domain_exceptions import (
+    NotEnoughRightsException,
+    PostNotFoundException,
+    UploadFileIsNotImageException,
+)
 from infrastructure.postgres.database import database
 from infrastructure.postgres.repositories import PostRepository
 from schemas.post import PostImageResponse
 from schemas.user import UserResponse
-from core.exceptions.domain_exceptions import (
-    PostNotFoundException,
-    NotEnoughRightsException,
-    UploadFileIsNotImageException
-)
-from core.exceptions.database_exceptions import NotFoundException
 
 ALLOWED_EXT = ["jpeg", "jpg", "png"]
 
@@ -25,10 +26,7 @@ class AddImageUseCase:
         os.makedirs(self.image_folder, exist_ok=True)
 
     async def execute(
-        self,
-        post_id: int,
-        image: UploadFile,
-        current_user: UserResponse
+        self, post_id: int, image: UploadFile, current_user: UserResponse
     ) -> PostImageResponse:
         file_extension = image.filename.split(".")[-1].lower()
         if file_extension not in ALLOWED_EXT:

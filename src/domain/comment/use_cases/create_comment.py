@@ -1,11 +1,8 @@
-from infrastructure.postgres.database import database
-from infrastructure.postgres.repositories import (
-    CommentRepository,
-    PostRepository
-)
-from schemas.comment import CommentResponse, CommentCreate
 from core.exceptions.database_exceptions import NotFoundException
 from core.exceptions.domain_exceptions import PostNotFoundException
+from infrastructure.postgres.database import database
+from infrastructure.postgres.repositories import CommentRepository, PostRepository
+from schemas.comment import CommentCreate, CommentResponse
 
 
 class CreateCommentUseCase:

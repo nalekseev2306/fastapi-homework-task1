@@ -1,13 +1,13 @@
+from core.exceptions.database_exceptions import NotFoundException
+from core.exceptions.domain_exceptions import (
+    DomainPermissionDeniedException,
+    UserNotFoundException,
+    UserWithEmailAlreadyExistException,
+    UserWithUsernameAlreadyExistException,
+)
 from infrastructure.postgres.database import database
 from infrastructure.postgres.repositories import UserRepository
 from schemas.user import UserResponse, UserUpdate
-from core.exceptions.database_exceptions import NotFoundException
-from core.exceptions.domain_exceptions import (
-    UserNotFoundException,
-    UserWithUsernameAlreadyExistException,
-    UserWithEmailAlreadyExistException,
-    DomainPermissionDeniedException
-)
 
 
 class UpdateUserUseCase:
@@ -15,10 +15,7 @@ class UpdateUserUseCase:
         self._database = database
 
     async def execute(
-        self,
-        user_id: int,
-        user_data: UserUpdate,
-        current_user: UserResponse
+        self, user_id: int, user_data: UserUpdate, current_user: UserResponse
     ) -> UserResponse:
         async with self._database.session() as session:
             repo = UserRepository(session)
@@ -29,7 +26,7 @@ class UpdateUserUseCase:
                 raise UserNotFoundException(user_id)
 
             if not current_user.is_superuser and user_id != current_user.id:
-                raise DomainPermissionDeniedException(method='update', model='users')
+                raise DomainPermissionDeniedException(method="update", model="users")
 
             if user_data.username:
                 try:

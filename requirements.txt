@@ -29,6 +29,7 @@ python-dotenv==1.2.2
 python-jose==3.5.0
 python-multipart==0.0.24
 rsa==4.9.1
+ruff==0.15.14
 six==1.17.0
 SQLAlchemy==2.0.47
 starlette==0.52.1

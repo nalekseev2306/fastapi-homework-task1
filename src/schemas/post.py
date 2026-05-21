@@ -1,7 +1,8 @@
-from pydantic import BaseModel, Field, field_validator
-from typing import Optional
 from datetime import datetime
+from typing import Optional
+
 from fastapi import HTTPException, status
+from pydantic import BaseModel, Field, field_validator
 
 
 class TitleValidatorMixin:
@@ -10,27 +11,27 @@ class TitleValidatorMixin:
     def validate_title(title: str):
         if title is None:
             return title
-        
+
         if not title or not title.strip():
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-                detail="Title cannot be empty or whitespace"
+                detail="Title cannot be empty or whitespace",
             )
-        
+
         stripped = title.strip()
-        
+
         if len(stripped) < 3:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-                detail="Title must be at least 3 characters long"
+                detail="Title must be at least 3 characters long",
             )
-        
+
         if len(stripped) > 256:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-                detail="Title cannot exceed 256 characters"
+                detail="Title cannot exceed 256 characters",
             )
-        
+
         return stripped
 
 

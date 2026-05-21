@@ -1,13 +1,11 @@
 import os
+
 from fastapi.responses import FileResponse
 
+from core.exceptions.database_exceptions import NotFoundException
+from core.exceptions.domain_exceptions import PostHasNoImageException, PostNotFoundException
 from infrastructure.postgres.database import database
 from infrastructure.postgres.repositories import PostRepository
-from core.exceptions.database_exceptions import NotFoundException
-from core.exceptions.domain_exceptions import (
-    PostNotFoundException,
-    PostHasNoImageException
-)
 
 
 class GetImageUseCase:

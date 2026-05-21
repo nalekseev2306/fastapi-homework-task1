@@ -1,8 +1,8 @@
+from core.exceptions.database_exceptions import NotFoundException
+from core.exceptions.domain_exceptions import UserNotFoundByEmailException
 from infrastructure.postgres.database import database
 from infrastructure.postgres.repositories import UserRepository
 from schemas.user import UserResponse
-from core.exceptions.database_exceptions import NotFoundException
-from core.exceptions.domain_exceptions import UserNotFoundByEmailException
 
 
 class GetUserByEmailUseCase:
@@ -17,5 +17,5 @@ class GetUserByEmailUseCase:
                 user = await repo.get_by_email(email)
             except NotFoundException:
                 raise UserNotFoundByEmailException(email=email)
-            
+
             return UserResponse.model_validate(user)

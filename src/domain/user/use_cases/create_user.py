@@ -1,15 +1,12 @@
+from core.exceptions.database_exceptions import AlreadyExistsException, NotFoundException
+from core.exceptions.domain_exceptions import (
+    UserWithEmailAlreadyExistException,
+    UserWithUsernameAlreadyExistException,
+)
 from infrastructure.postgres.database import database
 from infrastructure.postgres.repositories import UserRepository
-from schemas.user import UserResponse, UserCreate
-from core.exceptions.database_exceptions import (
-    NotFoundException,
-    AlreadyExistsException
-)
-from core.exceptions.domain_exceptions import (
-    UserWithUsernameAlreadyExistException,
-    UserWithEmailAlreadyExistException
-)
 from resources.auth import get_password_hash
+from schemas.user import UserCreate, UserResponse
 
 
 class CreateUserUseCase:
@@ -30,7 +27,7 @@ class CreateUserUseCase:
                     raise UserWithUsernameAlreadyExistException(user_data.username)
                 except NotFoundException:
                     pass
-                
+
                 try:
                     await repo.get_by_email(user_data.email)
                     raise UserWithEmailAlreadyExistException(user_data.email)

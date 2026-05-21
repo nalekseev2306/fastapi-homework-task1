@@ -1,12 +1,12 @@
-from infrastructure.postgres.database import database
-from infrastructure.postgres.repositories import LocationRepository
-from schemas.location import LocationResponse, LocationCreate
-from schemas.user import UserResponse
 from core.exceptions.database_exceptions import AlreadyExistsException
 from core.exceptions.domain_exceptions import (
     LocationWithNameAlreadyExistException,
-    NotEnoughRightsException
+    NotEnoughRightsException,
 )
+from infrastructure.postgres.database import database
+from infrastructure.postgres.repositories import LocationRepository
+from schemas.location import LocationCreate, LocationResponse
+from schemas.user import UserResponse
 
 
 class CreateLocationUseCase:
@@ -14,9 +14,7 @@ class CreateLocationUseCase:
         self._database = database
 
     async def execute(
-        self,
-        location_data: LocationCreate,
-        current_user: UserResponse
+        self, location_data: LocationCreate, current_user: UserResponse
     ) -> LocationResponse:
         async with self._database.session() as session:
             repo = LocationRepository(session)
@@ -28,5 +26,5 @@ class CreateLocationUseCase:
                 new_location = await repo.create(location_data)
             except AlreadyExistsException:
                 raise LocationWithNameAlreadyExistException(location_data.name)
-                
+
             return LocationResponse.model_validate(new_location)

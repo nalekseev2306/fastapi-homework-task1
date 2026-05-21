@@ -1,15 +1,12 @@
+from core.exceptions.database_exceptions import NotFoundException
+from core.exceptions.domain_exceptions import CategoryNotFoundException, LocationNotFoundException
 from infrastructure.postgres.database import database
 from infrastructure.postgres.repositories import (
-    PostRepository,
     CategoryRepository,
-    LocationRepository
+    LocationRepository,
+    PostRepository,
 )
-from schemas.post import PostResponse, PostCreate
-from core.exceptions.database_exceptions import NotFoundException
-from core.exceptions.domain_exceptions import (
-    CategoryNotFoundException,
-    LocationNotFoundException
-)
+from schemas.post import PostCreate, PostResponse
 
 
 class CreatePostUseCase:

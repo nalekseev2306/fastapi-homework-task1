@@ -1,12 +1,12 @@
-from infrastructure.postgres.database import database
-from infrastructure.postgres.repositories import CategoryRepository
-from schemas.category import CategoryResponse, CategoryCreate
-from schemas.user import UserResponse
 from core.exceptions.database_exceptions import AlreadyExistsException
 from core.exceptions.domain_exceptions import (
     CategoryWithSlugAlreadyExistException,
-    NotEnoughRightsException
+    NotEnoughRightsException,
 )
+from infrastructure.postgres.database import database
+from infrastructure.postgres.repositories import CategoryRepository
+from schemas.category import CategoryCreate, CategoryResponse
+from schemas.user import UserResponse
 
 
 class CreateCategoryUseCase:
@@ -14,9 +14,7 @@ class CreateCategoryUseCase:
         self._database = database
 
     async def execute(
-        self,
-        category_data: CategoryCreate,
-        current_user: UserResponse
+        self, category_data: CategoryCreate, current_user: UserResponse
     ) -> CategoryResponse:
         async with self._database.session() as session:
             repo = CategoryRepository(session)

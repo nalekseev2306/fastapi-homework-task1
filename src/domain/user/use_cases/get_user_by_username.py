@@ -1,8 +1,8 @@
+from core.exceptions.database_exceptions import NotFoundException
+from core.exceptions.domain_exceptions import UserNotFoundByUsernameException
 from infrastructure.postgres.database import database
 from infrastructure.postgres.repositories import UserRepository
 from schemas.user import UserResponse
-from core.exceptions.database_exceptions import NotFoundException
-from core.exceptions.domain_exceptions import UserNotFoundByUsernameException
 
 
 class GetUserByUsernameUseCase:

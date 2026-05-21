@@ -1,9 +1,8 @@
 from .base import BaseModel
-from .user import User
-from .post import Post
 from .category import Category
-from .location import Location
 from .comment import Comment
+from .location import Location
+from .post import Post
+from .user import User
 
-
-__all__ = ['BaseModel', 'User', 'Post', 'Category', 'Location', 'Comment']
+__all__ = ["BaseModel", "User", "Post", "Category", "Location", "Comment"]

@@ -1,22 +1,15 @@
+from core.exceptions.database_exceptions import NotFoundException
+from core.exceptions.domain_exceptions import CategoryNotFoundException, NotEnoughRightsException
 from infrastructure.postgres.database import database
 from infrastructure.postgres.repositories import CategoryRepository
 from schemas.user import UserResponse
-from core.exceptions.database_exceptions import NotFoundException
-from core.exceptions.domain_exceptions import (
-    CategoryNotFoundException,
-    NotEnoughRightsException
-)
 
 
 class DeleteCategoryUseCase:
     def __init__(self):
         self._database = database
 
-    async def execute(
-        self,
-        category_id: int,
-        current_user: UserResponse
-    ) -> None:
+    async def execute(self, category_id: int, current_user: UserResponse) -> None:
         async with self._database.session() as session:
             repo = CategoryRepository(session)
 

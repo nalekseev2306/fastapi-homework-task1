@@ -1,8 +1,8 @@
+from core.exceptions.database_exceptions import NotFoundException
+from core.exceptions.domain_exceptions import LocationNotFoundException
 from infrastructure.postgres.database import database
 from infrastructure.postgres.repositories import LocationRepository
 from schemas.location import LocationResponse
-from core.exceptions.database_exceptions import NotFoundException
-from core.exceptions.domain_exceptions import LocationNotFoundException
 
 
 class GetLocationUseCase:

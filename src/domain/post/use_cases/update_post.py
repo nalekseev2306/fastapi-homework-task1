@@ -1,26 +1,26 @@
+from core.exceptions.database_exceptions import NotFoundException
+from core.exceptions.domain_exceptions import (
+    CategoryNotFoundException,
+    DomainPermissionDeniedException,
+    LocationNotFoundException,
+    PostNotFoundException,
+)
 from infrastructure.postgres.database import database
-from infrastructure.postgres.repositories import (PostRepository, 
-    CategoryRepository, LocationRepository
+from infrastructure.postgres.repositories import (
+    CategoryRepository,
+    LocationRepository,
+    PostRepository,
 )
 from schemas.post import PostResponse, PostUpdate
 from schemas.user import UserResponse
-from core.exceptions.database_exceptions import NotFoundException
-from core.exceptions.domain_exceptions import (
-    PostNotFoundException,
-    CategoryNotFoundException,
-    LocationNotFoundException,
-    DomainPermissionDeniedException
-)
+
 
 class UpdatePostUseCase:
     def __init__(self):
         self._database = database
 
     async def execute(
-        self,
-        post_id: int,
-        post_data: PostUpdate,
-        current_user: UserResponse
+        self, post_id: int, post_data: PostUpdate, current_user: UserResponse
     ) -> PostResponse:
         async with self._database.session() as session:
             repo = PostRepository(session)
@@ -31,9 +31,9 @@ class UpdatePostUseCase:
                 existing_post = await repo.get(post_id)
             except NotFoundException:
                 raise PostNotFoundException(id=post_id)
-            
+
             if not current_user.is_superuser and existing_post.user_id != current_user.id:
-                raise DomainPermissionDeniedException(method='update', model='posts')
+                raise DomainPermissionDeniedException(method="update", model="posts")
 
             if post_data.category_id and post_data.category_id != existing_post.category_id:
                 try:

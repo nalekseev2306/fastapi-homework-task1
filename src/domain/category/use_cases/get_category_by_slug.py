@@ -1,8 +1,8 @@
+from core.exceptions.database_exceptions import NotFoundException
+from core.exceptions.domain_exceptions import CategoryNotFoundBySlugException
 from infrastructure.postgres.database import database
 from infrastructure.postgres.repositories import CategoryRepository
 from schemas.category import CategoryResponse
-from core.exceptions.database_exceptions import NotFoundException
-from core.exceptions.domain_exceptions import CategoryNotFoundBySlugException
 
 
 class GetCategoryBySlugUseCase:

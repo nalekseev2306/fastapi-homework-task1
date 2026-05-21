@@ -1,8 +1,8 @@
+from core.exceptions.database_exceptions import NotFoundException
+from core.exceptions.domain_exceptions import PostNotFoundException
 from infrastructure.postgres.database import database
 from infrastructure.postgres.repositories import PostRepository
 from schemas.post import PostResponse
-from core.exceptions.database_exceptions import NotFoundException
-from core.exceptions.domain_exceptions import PostNotFoundException
 
 
 class GetPostUseCase:

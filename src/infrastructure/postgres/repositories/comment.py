@@ -1,10 +1,11 @@
-from typing import Type, List, Optional
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, insert
+from typing import List, Optional, Type
 
+from sqlalchemy import insert, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from core.exceptions.database_exceptions import NotFoundException
 from infrastructure.postgres.models import Comment
 from schemas.comment import CommentCreate, CommentUpdate
-from core.exceptions.database_exceptions import NotFoundException
 
 
 class CommentRepository:
@@ -13,10 +14,7 @@ class CommentRepository:
         self._session = session
 
     async def get(self, comment_id: int) -> Optional[Comment]:
-        query = (
-            select(self._model)
-            .where(self._model.id == comment_id)
-        )
+        query = select(self._model).where(self._model.id == comment_id)
 
         comment = await self._session.scalar(query)
         if not comment:
@@ -38,22 +36,21 @@ class CommentRepository:
         comment = await self._session.scalar(query)
         return comment
 
-    async def update(self, comment_id: int,
-               comment_data: CommentUpdate) -> Optional[Comment]:
+    async def update(self, comment_id: int, comment_data: CommentUpdate) -> Optional[Comment]:
         comment = await self.get(comment_id)
-        
+
         update_data = comment_data.model_dump(exclude_unset=True)
         for key, value in update_data.items():
             if hasattr(comment, key):
                 setattr(comment, key, value)
-        
+
         await self._session.commit()
         await self._session.refresh(comment)
         return comment
 
     async def delete(self, comment_id: int) -> bool:
         comment = await self.get(comment_id)
-        
+
         await self._session.delete(comment)
         await self._session.commit()
         return True
