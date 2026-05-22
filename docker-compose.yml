@@ -40,6 +40,19 @@ services:
       postgres:
         condition: service_healthy
 
+  locust:
+      image: locustio/locust:latest
+      container_name: fastapi_locust
+      volumes:
+        - ./tests:/mnt/locust
+      command: -f /mnt/locust/locustfile.py --host http://app:8000
+      ports:
+        - "8089:8089"
+      depends_on:
+        - app
+      networks:
+        - app_network
+
 networks:
   app_network:
     driver: bridge

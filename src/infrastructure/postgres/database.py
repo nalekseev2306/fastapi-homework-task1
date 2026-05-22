@@ -10,7 +10,13 @@ from src.core.config import settings
 
 class Database:
     def __init__(self) -> None:
-        self._engine = create_async_engine(settings.postgres_url)
+        self._engine = create_async_engine(
+            settings.postgres_url,
+            pool_size=20,
+            max_overflow=10,
+            pool_pre_ping=True,
+            pool_recycle=3600,
+        )
         self._session_factory = async_sessionmaker(
             bind=self._engine,
             autocommit=False,

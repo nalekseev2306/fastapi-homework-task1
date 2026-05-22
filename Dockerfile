@@ -6,6 +6,7 @@ COPY ./alembic /app/alembic
 COPY alembic.ini /app/
 COPY requirements.txt /app/
 COPY ./media /app/media
+COPY ./tests /app/tests
 
 RUN mkdir -p /app/data
 
